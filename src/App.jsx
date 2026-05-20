@@ -74,7 +74,7 @@ export default function App() {
   ]);
 
   // ========================================================
-  // 核心預算與統計變數提升宣告 (解決 ReferenceError: totalSpentJPY is not defined 關鍵)
+  // 核心預算與統計計算變數 (安全置於頂部)
   // ========================================================
   const totalBudget = 245000; // JPY 總預算
   const totalSpentJPY = expenses.reduce((sum, item) => sum + item.amount, 0);
@@ -91,6 +91,36 @@ export default function App() {
   const [expFormCategory, setExpFormCategory] = useState('食物');
   const [expFormItem, setExpFormItem] = useState('');
   const [expFormAmount, setExpFormAmount] = useState('');
+
+  // ========================================================
+  // 補回缺失的記帳核心控制函數 (解決 handleAddExpenseManual ReferenceError)
+  // ========================================================
+  const handleAddExpenseManual = (e) => {
+    e.preventDefault();
+    if (!expFormItem.trim() || !expFormAmount) return;
+    
+    const dateMapping = {
+      '2026/06/24': 1, '2026/06/25': 2, '2026/06/26': 3,
+      '2026/06/27': 4, '2026/06/28': 5, '2026/06/29': 6, '2026/06/30': 7
+    };
+
+    const newExp = {
+      id: 'exp-' + Date.now(),
+      day: dateMapping[expFormDate] || 1,
+      date: expFormDate,
+      category: expFormCategory,
+      item: expFormItem,
+      amount: parseInt(expFormAmount)
+    };
+
+    setExpenses(prev => [...prev, newExp]);
+    setExpFormItem('');
+    setExpFormAmount('');
+  };
+
+  const handleDeleteExpense = (id) => {
+    setExpenses(prev => prev.filter(item => item.id !== id));
+  };
 
   // AI 每日行程智慧分析優化快照
   const [dailyAiAnalysis, setDailyAiAnalysis] = useState({});
@@ -152,7 +182,7 @@ export default function App() {
     'day1-spot3': { note: '福岡市動物園的狐檬太有活力了！今天天氣好舒服，野餐很成功。', photo: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=600&q=80' },
     'day2-spot4': { note: '夕陽下太良町的海上鳥居真的很夢幻...剛好等到滿潮，海水淹到第二個鳥居！超美。', photo: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80' },
     'day3-spot1': { note: '武雄市圖書館裡面的星巴克咖啡好香，建築物內部宏偉，不愧是日本最美圖書館之一。', photo: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=600&q=80' },
-    'day5-spot2': { note: '呼子港的活烏賊刺身簡集驚豔！身體是半透明的，吃起來無比甜脆！', photo: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=600&q=80' }
+    'day5-spot2': { note: '呼子港的活烏賊刺身精緻驚豔！身體是半透明的，吃起來無比甜脆！', photo: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=600&q=80' }
   });
 
   // 儲存/置換金鑰處理
@@ -430,7 +460,7 @@ export default function App() {
           desc: "日本公共建設美學新典範。巨大木質圓頂、挑高的頂天立地巨幅書牆，將蔦屋書店、星巴克與圖書館完美結合，沈浸於咖啡與書香的融合境界。",
           stay: "1.5 小時",
           tags: ["必吃", "必拍"],
-          photoTip: "館內禁止在非攝影區拍照。僅有「二樓平台指定拍照點」可俯瞰壯觀的木質圓弧書海，在此能拍出完美而震撼的文青大照！",
+          photoTip: "館內禁止在非攝影區拍照。僅有「二樓平台指定拍照點」可俯觀壯觀的木質圓弧書海，在此能拍出完美而震撼的文青大照！",
           navUrl: "https://maps.google.com/?q=Takeo+City+Library",
           parking: "圖書館專用大型免費停車場 (百台以上空位)。",
           gas: "出發 2 分鐘車程有 ENEOS 武雄昭和店。",
@@ -475,7 +505,7 @@ export default function App() {
           desc: "瓷器愛好者的聖殿！這裡的鳥居、守護狛犬、大燈籠甚至御守全部由名揚國際的「有田燒」陶瓷燒製，更奇妙的是有 JR 筑肥線平交道穿過神社核心！",
           stay: "1.5 小時",
           tags: ["必拍", "必買"],
-          photoTip: "站在陶瓷鳥居前，等黃藍相間的筑肥線單節小火車穿過平交道的那一瞬間按下快門，日本最奇幻的平交道照就此誕生！",
+          photoTip: "在細膩青翠的陶瓷鳥居前，等黃藍相間的筑肥線單節小火車穿過平交道的那一瞬間按下快門，日本最奇幻的平交道照就此誕生！",
           navUrl: "https://maps.google.com/?q=Sueyama+Shrine+Arita",
           parking: "穿過平交道前右側有神社專用無料停車場 (斜坡較陡，會車請小心慢行)。",
           gas: "JA 有田自營加油站 (離神社 4 分鐘)。",
@@ -585,7 +615,7 @@ export default function App() {
           desc: "呼子港最知名的活魚料理名店。水槽內游動的活烏賊現撈現切，上桌時身體幾近透明，咬下時肉質甘甜、彈牙脆口，觸手最後做成外酥內軟的熱騰騰天婦羅！",
           stay: "1.5 小時",
           tags: ["必吃", "必拍"],
-          photoTip: "當整隻呈半透明的烏賊端上桌、甚至觸手還在微微動時，快用手機錄影記錄這令人驚嘆的活鮮體驗！",
+          photoTip: "上桌時晶瑩剔透、幾近透光能看見底下盤子花紋的烏賊刺身，以及炸得金黃耀眼的天婦羅，是裝飾美食照的極佳素材！",
           navUrl: "https://maps.google.com/?q=Genkai+Ika+Funa-dokoro+Kaishu",
           parking: "餐廳前備有免費顧客專屬停車位。",
           gas: "JA 呼子加油站 (開車 4 分鐘)。",
@@ -615,7 +645,7 @@ export default function App() {
           desc: "【本日入住別墅】座落於絲島無敵海畔的旗艦奢華獨棟別墅別墅。高科技投影幕、極奢北歐中島廚房、私人戶外大露台。與旅伴在此烹煮新鮮食材，享受絲島最溫馨浪漫的海風BBQ渡假夜！",
           stay: "一整晚",
           tags: ["必拍"],
-          photoTip: "挑高奢華的起居室與美式中島，可以全家人捧著香檳與煎好的神戶牛，拍下最溫馨的旅行聚餐照！",
+          photoTip: "挑高奢華的起居室與美式中島，可以全家人捧著香檳與編排好一桌海鮮，拍下最溫馨的旅行聚餐照！",
           navUrl: "https://www.booking.com/hotel/jp/rakuten-stay-house-itoshima-vacation-stay-45356.zh-tw.html?label=gog235jc-10CAIY9QModTgISDBYA2jnAYgBAZgBM7gBF8gBDNgBA-gBAfgBAYgCAagCAbgChuTEyQbAAgHSAiRiYzkyMGE3Yy0zNDcwLTRiM2EtYmU0MS1lNTdkZTVlODA2MWLYAgHgAgE&sid=033ceb0d4a82f564481efb180948a781&aid=356980&ucfs=1&checkin=2026-06-28&checkout=2026-06-29&dest_id=4746&dest_type=region&group_adults=3&no_rooms=1&group_children=2&age=10&req_age=10&age=12&req_age=12&nflt=entire_place_bedroom_count%3D2&srpvid=813e3d6d857e0359&srepoch=1767516293&matching_block_id=574274002_361063853_0_0_0&atlas_src=sr_iw_title",
           parking: "別墅門前備有免費顧客專屬停車位 2 格。",
           gas: "開車 5 分鐘處有出光志摩加油站。",
@@ -655,7 +685,7 @@ export default function App() {
           desc: "絲島最閃耀的靈魂風景！兩座巨大的海中雙子岩由神聖的注連繩相扣，海灘沙地上立著一座雪白莊嚴的「海上鳥居」，大浪捲過白色柱石，景象震懾。午後在海景咖啡廳品嚐冰淇淋。",
           stay: "1.5 小時",
           tags: ["必拍"],
-          photoTip: "人站在沙灘，穿過純白鳥居 the center of the columns，將遠處海面上的夫婦岩完美框在相片正中央，這是九州最具代表性的名信片大片！",
+          photoTip: "人站在沙灘，穿過純白鳥居，將遠處海面上的夫婦岩完美框在相片正中央，這是九州最具代表性的名信片大片！",
           navUrl: "https://maps.google.com/?q=Sakurai+Futamigaura+Itoshima",
           parking: "夫婦岩前有料公共停車場 (前 1 小時 300 日圓 / 隨後累加。)",
           gas: "Idemitsu 出光志摩自營加油站。",
@@ -670,7 +700,7 @@ export default function App() {
           desc: "在沙灘旁並排生長的兩棵自然傾斜的巨大椰子樹，被搭成了朝向大海的巨型鞦韆。可以一邊吹著海風，一邊朝著蔚藍海天盪漾，歡聲笑語不斷。",
           stay: "1.5 小時",
           tags: ["必吃", "必拍"],
-          photoTip: "盪到最高點、雙腳伸向海天與白色沙灘交界的那一瞬間，請旅伴用連拍捕捉，拍出極致青春、宛如防彈少年團MV風的海報！",
+          photoTip: "盪到最高點、雙腳伸向海天與白色沙灘交界的那一瞬間，請旅伴用連拍捕捉，拍出極致青春、宛如電影般的海報風！",
           navUrl: "https://maps.google.com/?q=Yashinoki+Swing+Itoshima",
           parking: "海鮮餐廳（ざうお）專用停車場 (用餐顧客享免收車資折抵)。",
           gas: "出發往福岡方向前，可在 ENEOS 糸島今宿店把油加滿，方便還車手續。",
@@ -844,7 +874,7 @@ export default function App() {
     }
   };
 
-  // 智慧 AI 相機/發票辨識記帳處理 (Multimodal Gemini API)
+  // 智慧 AI 相機/發票辨識記帳處理 (開源 Gemini API)
   const handleReceiptUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -911,7 +941,7 @@ export default function App() {
 
         setChatMessages(prev => [...prev, { 
           sender: 'bot', 
-          text: `✨ 櫻子收到您的明細照片囉！已幫您智慧辨識收據並完成記帳：\n\n📅 日期：D${activeDay} (${newExp.date})\n🛍 項目：${mockItem} (AI辨識)\n🏷 類別：食物\n💰 金額：￥${mockAmount.toLocaleString()} 日圓\n\n已為您同步加入【消費記帳】總帳本囉！🌸`
+          text: `✨ 櫻子收到您的明細照片囉！已自動幫您智慧辨識收據並完成記帳：\n\n📅 日期：D${activeDay} (${newExp.date})\n🛍 項目：${mockItem} (AI辨識)\n🏷 類別：食物\n💰 金額：￥${mockAmount.toLocaleString()} 日圓\n\n已為您同步加入【消費記帳】總帳本囉！🌸`
         }]);
       } finally {
         setChatLoading(false);
@@ -1382,7 +1412,7 @@ export default function App() {
           )}
 
           {/* ======================================================== */}
-          {/* 記帳理財分頁 (EXPENSES - Feature 4) */}
+          {/* 記帳理財分頁 (EXPENSES) */}
           {/* ======================================================== */}
           {activeTab === 'expenses' && (
             <div className="space-y-4 animate-fade-in">
@@ -1454,7 +1484,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 手動登錄費用紀錄表單 (Feature 4 要求) */}
+              {/* 手動登錄費用紀錄表單 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3">
                 <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                   <Plus size={14} className="text-[#FF8E99]" />
