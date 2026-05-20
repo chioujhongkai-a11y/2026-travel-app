@@ -1,0 +1,16 @@
+/* 引入 Tailwind CSS v4 核心樣式（這一行最重要） */
+@import "tailwindcss";
+
+/* 移除預設 Vite 的置中與寬度限制，確保您的旅遊 App 滿版流暢 */
+body {
+  margin: 0;
+  background-color: #f8fafc; /* 搭配您 App 的 slate-50 背景 */
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left; /* 修正預設的文字置中，讓行程表排版正常 */
+}
