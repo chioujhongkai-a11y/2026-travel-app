@@ -1153,7 +1153,7 @@ export default function App() {
           "category": "食物/交通/購物/活動/住宿/其他"
         }
         ---BOOKKEEPING_END---
-        接著在第二行開始，以溫慢的口吻讚美或肯定這次消費。
+        接著繼續等待。
       `;
     }
 
