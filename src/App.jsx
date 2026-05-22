@@ -193,7 +193,7 @@ const initialDaysData = [
         time: "09:30",
         name: "武雄市圖書館 📚",
         category: "活動",
-        desc: "日本最美圖書館代表。木質大穹頂、絕美書架。館內結合星巴克與書香，極具美學氣息。",
+        desc: "日本最美圖書館代表。木質大穹頂、絕美書架。馆內結合星巴克與書香，極具美學氣息。",
         stay: "1.5 小時",
         tags: ["必吃", "必拍"],
         navUrl: "https://www.google.com/maps/dir/?api=1&destination=Takeo+City+Library",
@@ -919,51 +919,51 @@ export default function App() {
       <div className="w-full max-w-md h-full bg-white shadow-2xl relative overflow-hidden flex flex-col animate-fade-in" style={{ height: '100dvh' }}>
         
         {/* APP HEADER */}
-        <header className="bg-gradient-to-r from-[#2A4B7C] to-[#3B629B] text-white pt-8 pb-6 px-5 rounded-b-[2rem] shadow-lg relative shrink-0">
-          <div className="absolute bottom-0 left-0 right-0 opacity-10 pointer-events-none overflow-hidden h-8">
+        <header className="bg-gradient-to-r from-[#2A4B7C] to-[#3B629B] text-white pt-4 pb-3.5 px-4 rounded-b-2xl shadow-md relative shrink-0">
+          <div className="absolute bottom-0 left-0 right-0 opacity-10 pointer-events-none overflow-hidden h-6">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-full fill-current">
               <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,42.4V0Z" />
             </svg>
           </div>
 
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-center">
             <div>
-              <div className="flex items-center gap-1 bg-[#FF8E99] text-white text-[11px] font-bold px-2 py-0.5 rounded-full w-max mb-1.5 shadow-sm">
-                <Sparkles size={11} />
+              <div className="flex items-center gap-1 bg-[#FF8E99] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full w-max mb-1 shadow-sm">
+                <Sparkles size={9} />
                 <span>2026 九州自由行</span>
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm font-['Zen_Maru_Gothic']">2026 九州自由行</h1>
-              <p className="text-xs text-[#EAF2F8] mt-1 flex items-center gap-1 font-sans">
-                <Calendar size={12} />
-                <span>2026/06/24 — 06/30 (7天6夜)</span>
+              <h1 className="text-xl font-bold tracking-tight text-white drop-shadow-sm font-['Zen_Maru_Gothic']">2026 九州自由行</h1>
+              <p className="text-[10px] text-[#EAF2F8] mt-0.5 flex items-center gap-1 font-sans">
+                <Calendar size={10} />
+                <span>06/24 — 06/30 (7天6夜)</span>
               </p>
             </div>
             
-            <div className="bg-white/10 p-2.5 rounded-2xl backdrop-blur-md border border-white/20 text-center animate-fade-in">
-              <span className="block text-[9px] uppercase tracking-wider text-blue-200">當前位置</span>
-              <span className="text-sm font-bold block mt-0.5 text-yellow-200 font-sans">{currentDayData ? currentDayData.area : '九州'}</span>
+            <div className="bg-white/10 px-2 py-1 rounded-xl backdrop-blur-md border border-white/20 text-center">
+              <span className="block text-[8px] uppercase tracking-wider text-blue-200">當前位置</span>
+              <span className="text-xs font-bold block text-yellow-200 font-sans">{currentDayData ? currentDayData.area : '九州'}</span>
             </div>
           </div>
 
           {/* 財務與自駕狀態一覽欄 */}
-          <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/10 text-center text-xs">
-            <div className="bg-white/5 py-1.5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-blue-200 block">累計支出</span>
-              <span className="font-bold text-sm text-white font-sans font-bold">￥{totalSpentJPY.toLocaleString()}</span>
+          <div className="grid grid-cols-3 gap-1.5 mt-2.5 pt-2.5 border-t border-white/10 text-center text-[10px]">
+            <div className="bg-white/5 py-1 rounded-lg border border-white/5">
+              <span className="text-[8px] text-blue-200 block">累計支出</span>
+              <span className="font-bold text-xs text-white">￥{totalSpentJPY.toLocaleString()}</span>
             </div>
-            <div className="bg-white/5 py-1.5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-blue-200 block">台幣等值</span>
-              <span className="font-bold text-sm text-yellow-100 font-sans font-bold font-bold font-bold font-bold font-bold font-bold font-bold">NT$ {totalSpentTWD.toLocaleString()}</span>
+            <div className="bg-white/5 py-1 rounded-lg border border-white/5">
+              <span className="text-[8px] text-blue-200 block">台幣等值</span>
+              <span className="font-bold text-xs text-yellow-100">NT$ {totalSpentTWD.toLocaleString()}</span>
             </div>
-            <div className="bg-white/5 py-1.5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-blue-200 block">剩餘預算</span>
-              <span className="font-bold text-sm text-emerald-300 font-sans font-bold font-bold font-bold font-bold">￥{(totalBudget - totalSpentJPY).toLocaleString()}</span>
+            <div className="bg-white/5 py-1 rounded-lg border border-white/5">
+              <span className="text-[8px] text-blue-200 block">剩餘預算</span>
+              <span className="font-bold text-xs text-emerald-300">￥{(totalBudget - totalSpentJPY).toLocaleString()}</span>
             </div>
           </div>
         </header>
 
-        {/* 1. MAIN BODY CONTENT AREA (pb-36 徹底解決行程列表最底端不遮擋、不被浮動 Nav 擋住的問題) */}
-        <main id="main-content-area" className="flex-1 overflow-y-auto px-4 pt-5 pb-36">
+        {/* 1. MAIN BODY CONTENT AREA (pb-28 徹底解決行程列表最底端不遮擋、不被浮動 Nav 擋住的問題) */}
+        <main id="main-content-area" className="flex-1 overflow-y-auto px-4 pt-4 pb-28">
 
           {/* ======================================================== */}
           {/* 行程分頁 (ITINERARY) */}
@@ -1002,7 +1002,7 @@ export default function App() {
 
               {/* 每日小提示與天氣穿搭卡片 */}
               {currentDayData && (
-                <div className="bg-[#FDF9F3] border border-[#F3E3CD] rounded-3xl p-4 shadow-sm flex flex-col gap-3 transition-all duration-300 font-sans">
+                <div className="bg-[#FDF9F3] border border-[#F3E3CD] rounded-3xl p-4 shadow-sm flex flex-col gap-3 transition-all duration-300 font-sans font-sans font-sans">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="bg-[#E6AF2E] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">
@@ -1168,7 +1168,7 @@ export default function App() {
                                 ) : (
                                   spotExpensesList.map(e => (
                                     <div key={e.id} className="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border border-gray-100/50">
-                                      <div className="flex items-center gap-1.5 min-w-0 font-sans font-sans font-sans">
+                                      <div className="flex items-center gap-1.5 min-w-0 font-sans font-sans">
                                         <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md shrink-0">
                                           {e.category}
                                         </span>
@@ -1314,18 +1314,18 @@ export default function App() {
                 <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/10 text-center">
                   <div>
                     <span className="text-[10px] text-blue-200 block font-sans font-sans font-sans font-sans">實際累計支出 (日圓)</span>
-                    <span className="font-bold text-lg text-white font-sans font-sans font-sans font-sans">￥{totalSpentJPY.toLocaleString()}</span>
+                    <span className="font-bold text-lg text-white font-sans font-sans font-sans font-sans font-sans font-sans">￥{totalSpentJPY.toLocaleString()}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-blue-200 block font-sans">折合台幣 (依0.21估算)</span>
+                    <span className="text-[10px] text-blue-200 block">折合台幣 (依0.21估算)</span>
                     <span className="font-bold text-lg text-yellow-200">NT$ {totalSpentTWD.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
 
               {/* 📥 智慧 Excel 一鍵匯出按鈕區塊 */}
-              <div className="bg-white rounded-3xl p-4 shadow-md border border-[#E9ECF0] text-center space-y-2 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
-                <p className="text-xs text-[#5D6D7E] leading-relaxed font-sans">
+              <div className="bg-white rounded-3xl p-4 shadow-md border border-[#E9ECF0] text-center space-y-2 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+                <p className="text-xs text-[#5D6D7E] leading-relaxed font-sans font-sans font-sans">
                   想要整理紙本或者與旅伴分攤費用嗎？您可以一鍵將「所有每日行程、住宿資訊、記帳流水帳、打包準備清單」以 Excel (CSV) 格式打包匯出！
                 </p>
                 <button 
@@ -1338,8 +1338,8 @@ export default function App() {
               </div>
 
               {/* 手動獨立登錄費用紀錄表單 */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans font-sans">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
                   <Plus size={14} className="text-[#FF8E99]" />
                   <span>新增常規獨立花費 (如：ETC儲值、免稅採購)</span>
                 </span>
@@ -1347,7 +1347,7 @@ export default function App() {
                 <form onSubmit={handleAddExpenseManual} className="space-y-3">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">消費日期</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">消費日期</label>
                       <select 
                         value={expFormDate}
                         onChange={(e) => setExpFormDate(e.target.value)}
@@ -1364,7 +1364,7 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans">費用類別</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans">費用類別</label>
                       <select 
                         value={expFormCategory}
                         onChange={(e) => setExpFormCategory(e.target.value)}
@@ -1380,15 +1380,15 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 font-sans font-sans font-sans font-sans font-sans">
+                  <div className="grid grid-cols-3 gap-2 font-sans font-sans font-sans font-sans font-sans font-sans">
                     <div className="col-span-2">
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans font-sans font-sans font-sans">消費項目名稱</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans font-sans font-sans font-sans font-sans">消費項目名稱</label>
                       <input 
                         type="text" 
                         value={expFormItem}
                         onChange={(e) => setExpFormItem(e.target.value)}
                         placeholder="例：自駕油錢、免稅藥妝..."
-                        className="w-full text-xs border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] text-slate-700 font-sans font-sans"
+                        className="w-full text-xs border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] text-slate-700 font-sans"
                       />
                     </div>
                     <div>
@@ -1406,7 +1406,7 @@ export default function App() {
                   <button 
                     type="submit"
                     disabled={!expFormItem.trim() || !expFormAmount}
-                    className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white p-2 px-3 py-2 rounded-xl hover:bg-[#1E3A5F] font-bold text-xs transition-all flex items-center justify-center gap-1 font-sans"
+                    className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white p-2 px-3 py-2 rounded-xl hover:bg-[#1E3A5F] font-bold text-xs transition-all flex items-center justify-center gap-1 font-sans font-sans font-sans font-sans"
                   >
                     <Plus size={13} />
                     <span>登錄常規消費</span>
@@ -1415,8 +1415,8 @@ export default function App() {
               </div>
 
               {/* 類別比例結構分析 */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 animate-fade-in font-sans font-sans">
-                <span className="text-xs font-bold text-slate-800 block font-sans">各項消費分類比例分析</span>
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 animate-fade-in font-sans font-sans font-sans font-sans">
+                <span className="text-xs font-bold text-slate-800 block font-sans font-sans">各項消費分類比例分析</span>
                 <div className="grid grid-cols-3 gap-2">
                   {Object.keys(categoryBreakdown).map(cat => {
                     const amt = categoryBreakdown[cat];
@@ -1433,9 +1433,9 @@ export default function App() {
               </div>
 
               {/* 詳細費用記帳明細流 (完美整合景點與一般記帳) */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans font-sans">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-800 font-sans font-sans font-sans font-sans font-sans font-sans">已登錄消費流水明細</span>
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans font-sans font-sans font-sans">
+                <div className="flex justify-between items-center font-sans font-sans font-sans">
+                  <span className="text-xs font-bold text-slate-800 font-sans font-sans">已登錄消費流水明細</span>
                   <span className="text-[10px] text-gray-400">共 {expenses.length} 筆款項</span>
                 </div>
 
@@ -1443,7 +1443,7 @@ export default function App() {
                   {expenses.slice().reverse().map(item => {
                     const style = getCategoryStyle(item.category);
                     return (
-                      <div key={item.id} className="pt-2.5 flex items-center justify-between gap-2 hover:bg-slate-50/50 rounded-xl px-1 transition-colors font-sans font-sans font-sans font-sans font-sans font-sans">
+                      <div key={item.id} className="pt-2.5 flex items-center justify-between gap-2 hover:bg-slate-50/50 rounded-xl px-1 transition-colors font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
                         <div className="flex items-center gap-2.5 min-w-0 font-sans">
                           <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] ${style.dot} text-white shrink-0`}>
                             {item.category === '食物' && <Utensils size={12} />}
@@ -1453,29 +1453,29 @@ export default function App() {
                             {item.category === '住宿' && <Hotel size={12} />}
                             {item.category === '其他' && <FileText size={12} />}
                           </span>
-                          <div className="truncate font-sans font-sans">
-                            <span className="text-xs font-bold text-slate-800 block truncate font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">{item.item}</span>
+                          <div className="truncate font-sans font-sans font-sans font-sans font-sans">
+                            <span className="text-xs font-bold text-slate-800 block truncate font-sans font-sans font-sans font-sans font-sans">{item.item}</span>
                             
                             {/* 顯示景點綁定狀態 */}
                             {item.spotName ? (
-                              <span className="text-[10px] text-blue-600 font-bold block mt-0.5 font-sans font-sans font-sans font-sans font-sans">
+                              <span className="text-[10px] text-blue-600 font-bold block mt-0.5 font-sans font-sans font-sans">
                                 📍 於: {item.spotName}
                               </span>
                             ) : (
-                              <span className="text-[9px] text-gray-400 block mt-0.5">D{item.day} ({item.date}) · 一般記帳</span>
+                              <span className="text-[9px] text-gray-400 block mt-0.5 font-sans">D{item.day} ({item.date}) · 一般記帳</span>
                             )}
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0 font-sans">
                           <div className="text-right">
-                            <span className="text-xs font-bold text-slate-800 block font-sans">￥{item.amount.toLocaleString()}</span>
-                            <span className="text-[9px] text-gray-400 block font-sans">約 NT$ {Math.round(item.amount * 0.21)}</span>
+                            <span className="text-xs font-bold text-slate-800 block">￥{item.amount.toLocaleString()}</span>
+                            <span className="text-[9px] text-gray-400 block font-sans font-sans font-sans">約 NT$ {Math.round(item.amount * 0.21)}</span>
                           </div>
                           
                           <button 
                             onClick={() => handleDeleteExpense(item.id)}
-                            className="text-gray-300 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                            className="text-gray-300 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors font-sans"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -1497,7 +1497,7 @@ export default function App() {
               
               {/* 自駕地圖看板 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 text-center">
-                <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider font-sans font-sans font-sans">
+                <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider font-sans font-sans">
                   2026 九州自駕環線圖 (台灣 ✈ 福岡 🚗 佐賀 🚗 糸島 🚗 福岡)
                 </span>
                 <h3 className="font-bold text-[#2A4B7C] text-base font-sans">7天6夜完整環形開車路線</h3>
@@ -1535,15 +1535,15 @@ export default function App() {
                     <g transform="translate(200,60)">
                       <circle r="7" fill="#2A4B7C" />
                       <circle r="3" fill="#FFFFFF" />
-                      <text x="10" y="4" className="text-[10px] font-bold fill-[#2A4B7C] font-sans font-sans font-sans">福岡 (博多)</text>
+                      <text x="10" y="4" className="text-[10px] font-bold fill-[#2A4B7C] font-sans">福岡 (博多)</text>
                     </g>
                     <g transform="translate(140,100)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-35" y="-6" className="text-[9px] font-bold fill-[#4A5568] font-sans">佐賀市</text>
+                      <text x="-35" y="-6" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans">佐賀市</text>
                     </g>
                     <g transform="translate(110,160)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="10" y="4" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans font-sans font-sans">太良町 (海中鳥居)</text>
+                      <text x="10" y="4" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans">太良町 (海中鳥居)</text>
                     </g>
                     <g transform="translate(100,120)">
                       <circle r="5" fill="#2A4B7C" />
@@ -1551,7 +1551,7 @@ export default function App() {
                     </g>
                     <g transform="translate(60,110)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans">有田陶瓷</text>
+                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans">有田陶瓷</text>
                     </g>
                     <g transform="translate(50,80)">
                       <circle r="5" fill="#2A4B7C" />
@@ -1559,11 +1559,11 @@ export default function App() {
                     </g>
                     <g transform="translate(90,50)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans font-sans">唐津城</text>
+                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans">唐津城</text>
                     </g>
                     <g transform="translate(145,40)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="0" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans font-sans font-sans">糸島半島</text>
+                      <text x="0" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans">糸島半島</text>
                     </g>
 
                     <text x="100" y="110" className="text-sm">✈</text>
@@ -1575,11 +1575,11 @@ export default function App() {
               {/* 氣象與每日降雨預報表 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
                 <span className="text-xs font-bold text-gray-400 block uppercase font-sans">每日區域預報 (2026/06/24 - 06/30)</span>
-                <div className="divide-y divide-gray-100 font-sans font-sans font-sans font-sans">
+                <div className="divide-y divide-gray-100 font-sans font-sans font-sans">
                   {itinerary.map(d => (
-                    <div key={d.day} className="py-3 flex items-center justify-between gap-2 animate-fade-in font-sans font-sans font-sans font-sans font-sans font-sans">
+                    <div key={d.day} className="py-3 flex items-center justify-between gap-2 animate-fade-in font-sans">
                       <div className="flex items-center gap-2">
-                        <span className="bg-[#2A4B7C] text-white font-bold font-sans text-[10px] w-6 h-6 rounded-full flex items-center justify-center font-sans">
+                        <span className="bg-[#2A4B7C] text-white font-bold font-sans text-[10px] w-6 h-6 rounded-full flex items-center justify-center">
                           D{d.day}
                         </span>
                         <div>
@@ -1589,8 +1589,8 @@ export default function App() {
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <span className="text-xs font-bold font-sans text-slate-700 block font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">{d.temp}</span>
+                        <div className="text-right font-sans">
+                          <span className="text-xs font-bold font-sans text-slate-700 block">{d.temp}</span>
                           <span className="text-[9px] text-gray-400 block">體感約 28°C</span>
                         </div>
 
@@ -1600,8 +1600,8 @@ export default function App() {
                           ) : (
                             <CloudSun size={16} className="text-orange-400" />
                           )}
-                          <div className="text-left font-sans font-sans">
-                            <span className="text-[9px] text-gray-400 block">降雨機率</span>
+                          <div className="text-left font-sans">
+                            <span className="text-[9px] text-gray-400 block font-sans">降雨機率</span>
                             <span className="text-[10px] font-bold text-[#2A4B7C] block font-sans">{d.rainChance}</span>
                           </div>
                         </div>
@@ -1626,16 +1626,16 @@ export default function App() {
                   <BookOpen size={16} />
                   <span className="text-xs font-bold uppercase tracking-wider font-sans font-sans">旅行工具箱 ＆ 行前準備</span>
                 </div>
-                <h3 className="text-base font-bold font-sans font-sans font-sans">九州自由行・數位隨身錦囊</h3>
-                <p className="text-xs text-blue-100 leading-relaxed">
+                <h3 className="text-base font-bold font-sans">九州自由行・數位隨身錦囊</h3>
+                <p className="text-xs text-blue-100 leading-relaxed font-sans">
                   包含行李打包檢查、日本自駕規則、以及住宿資訊！
                 </p>
               </div>
 
               {/* 1. 行李清單管理庫 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-4">
-                <div className="flex justify-between items-center font-sans">
-                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans">
+                <div className="flex justify-between items-center font-sans font-sans">
+                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                     <CheckSquare size={14} className="text-[#FF8E99]" />
                     <span>行李打包與準備清單</span>
                   </span>
@@ -1663,17 +1663,17 @@ export default function App() {
                   </button>
                 </div>
 
-                <div className="space-y-4 pt-1 font-sans font-sans font-sans">
+                <div className="space-y-4 pt-1 font-sans">
                   {/* Category: 隨身行李 */}
-                  <div className="space-y-2.5 font-sans font-sans">
-                    <h4 className="text-xs font-bold text-[#2A4B7C] bg-[#EAF2F8] px-2.5 py-1 rounded-lg w-max font-sans font-sans">
+                  <div className="space-y-2.5">
+                    <h4 className="text-xs font-bold text-[#2A4B7C] bg-[#EAF2F8] px-2.5 py-1 rounded-lg w-max font-sans">
                       💼 隨身行李 (證件、貴重與隨身物品)
                     </h4>
                     <div className="space-y-1.5 font-sans font-sans">
                       {packingList.personal.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-all border border-gray-100 font-sans font-sans font-sans">
+                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-all border border-gray-100 font-sans">
                           
-                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans">
                             <span onClick={() => toggleItem('personal', item.id)} className="shrink-0 font-sans">
                               {item.checked ? (
                                 <CheckSquare size={16} className="text-[#FF8E99]" />
@@ -1703,7 +1703,7 @@ export default function App() {
                             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
                               <button onClick={() => adjustQty('personal', item.id, -1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans">-</button>
                               <span className="px-2 text-[10px] font-bold text-slate-700 bg-white font-sans">{item.qty}</span>
-                              <button onClick={() => adjustQty('personal', item.id, 1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans font-sans">+</button>
+                              <button onClick={() => adjustQty('personal', item.id, 1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans font-sans font-sans">+</button>
                             </div>
                             <button 
                               onClick={() => deleteItem('personal', item.id)} 
@@ -1720,15 +1720,15 @@ export default function App() {
 
                   {/* Category: 託運行李 */}
                   <div className="space-y-2.5 font-sans font-sans">
-                    <h4 className="text-xs font-bold text-[#C68D00] bg-yellow-50 px-2.5 py-1 rounded-lg w-max font-sans font-sans">
+                    <h4 className="text-xs font-bold text-[#C68D00] bg-yellow-50 px-2.5 py-1 rounded-lg w-max font-sans">
                       🧳 託運行李 (大行李箱與個人裝備)
                     </h4>
                     <div className="space-y-1.5">
                       {packingList.checked.map(item => (
                         <div key={item.id} className="flex items-center justify-between p-2 hover:bg-[#F5F7FA] rounded-xl transition-all border border-gray-100 font-sans">
                           
-                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans font-sans">
-                            <span onClick={() => toggleItem('checked', item.id)} className="shrink-0">
+                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans">
+                            <span onClick={() => toggleItem('checked', item.id)} className="shrink-0 font-sans">
                               {item.checked ? (
                                 <CheckSquare size={16} className="text-[#E6AF2E]" />
                               ) : (
@@ -1741,7 +1741,7 @@ export default function App() {
                                 type="text"
                                 value={item.text}
                                 onChange={(e) => handleEditPackingText('checked', item.id, e.target.value)}
-                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans font-sans"
+                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
                               />
                             ) : (
                               <span 
@@ -1757,7 +1757,7 @@ export default function App() {
                             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
                               <button onClick={() => adjustQty('checked', item.id, -1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans">-</button>
                               <span className="px-2 text-[10px] font-bold text-slate-700 bg-white font-sans">{item.qty}</span>
-                              <button onClick={() => adjustQty('checked', item.id, 1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans font-sans">+</button>
+                              <button onClick={() => adjustQty('checked', item.id, 1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans font-sans font-sans font-sans font-sans">+</button>
                             </div>
                             <button 
                               onClick={() => deleteItem('checked', item.id)} 
@@ -1798,22 +1798,22 @@ export default function App() {
 
               {/* 住宿確認 ── 已更正為「住宿資訊」 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                   <FileText size={14} className="text-emerald-600" />
                   <span>住宿資訊</span>
                 </span>
                 
-                <div className="space-y-2.5 font-sans font-sans font-sans">
+                <div className="space-y-2.5 font-sans font-sans">
                   {itinerary.filter(d => d.spots.some(s => s.category === '酒店')).map(d => {
                     const hotelSpot = d.spots.find(s => s.category === '酒店');
                     return (
                       <div key={d.day} className="border border-emerald-100 rounded-2xl p-3 bg-emerald-50/20 flex justify-between items-center">
-                        <div className="flex-1 pr-2 min-w-0 font-sans font-sans font-sans font-sans font-sans">
+                        <div className="flex-1 pr-2 min-w-0 font-sans font-sans">
                           <span className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase font-sans font-sans font-sans">
                             D{d.day} ({d.date.split(' ')[0]})
                           </span>
                           <h5 className="font-bold text-xs text-slate-800 mt-1 truncate">{hotelSpot.name}</h5>
-                          <span className="text-[10px] text-gray-400 block font-bold font-sans font-sans font-sans">本日訂房花費: ￥{expenses.find(e => e.day === d.day && e.category === '住宿')?.amount?.toLocaleString() || '0'} 日圓</span>
+                          <span className="text-[10px] text-gray-400 block font-bold font-sans">本日訂房花費: ￥{expenses.find(e => e.day === d.day && e.category === '住宿')?.amount?.toLocaleString() || '0'} 日圓</span>
                         </div>
                         <a 
                           href={hotelSpot.navUrl} 
@@ -1830,12 +1830,12 @@ export default function App() {
               </div>
 
               {/* 日本自駕規則提醒 */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans">
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                   <Info size={14} className="text-blue-500" />
                   <span>自駕安全與 ETC 退稅指引</span>
                 </span>
-                <ul className="text-xs text-[#5D6D7E] space-y-2 list-disc pl-4 leading-relaxed font-sans font-sans">
+                <ul className="text-xs text-[#5D6D7E] space-y-2 list-disc pl-4 leading-relaxed font-sans">
                   <li><strong>靠左行駛</strong>：日本方向盤及車道均相反，請隨時提醒自己「靠左慢行」。</li>
                   <li><strong>行人優先</strong>：斑白線前若有行人，請務必完全靜止禮讓。</li>
                   <li><strong>過路費/ETC</strong>：自駕上高速公路建議使用 ETC 卡片，方便進出閘道。</li>
@@ -1848,54 +1848,54 @@ export default function App() {
         </main>
 
         {/* BOTTOM FLOATING NAV BAR */}
-        <nav className="absolute bottom-5 left-4 right-4 bg-white/80 backdrop-blur-xl rounded-[2.2rem] py-3 px-4 shadow-2xl border border-white/40 flex justify-around items-center z-40 animate-fade-in font-sans">
+        <nav className="absolute bottom-3 left-4 right-4 bg-white/80 backdrop-blur-xl rounded-2xl py-2 px-3 shadow-xl border border-white/40 flex justify-around items-center z-40 animate-fade-in font-sans">
           
           <button 
             onClick={() => setActiveTab('itinerary')}
-            className={`flex flex-col items-center justify-center gap-1 transition-all ${
+            className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
               activeTab === 'itinerary' 
-                ? 'text-[#2A4B7C] scale-110 font-bold' 
+                ? 'text-[#2A4B7C] scale-105 font-bold' 
                 : 'text-gray-400 hover:text-slate-600'
             }`}
           >
-            <Compass size={18} className={activeTab === 'itinerary' ? 'text-[#FF8E99] animate-pulse' : ''} />
-            <span className="text-[9px]">詳細行程</span>
+            <Compass size={16} className={activeTab === 'itinerary' ? 'text-[#FF8E99] animate-pulse' : ''} />
+            <span className="text-[8px]">詳細行程</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('expenses')}
-            className={`flex flex-col items-center justify-center gap-1 transition-all ${
+            className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
               activeTab === 'expenses' 
-                ? 'text-[#2A4B7C] scale-110 font-bold' 
+                ? 'text-[#2A4B7C] scale-105 font-bold' 
                 : 'text-gray-400 hover:text-slate-600'
             }`}
           >
-            <FileText size={18} className={activeTab === 'expenses' ? 'text-[#FF8E99]' : ''} />
-            <span className="text-[9px]">消費記帳</span>
+            <FileText size={16} className={activeTab === 'expenses' ? 'text-[#FF8E99]' : ''} />
+            <span className="text-[8px]">消費記帳</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('weather')}
-            className={`flex flex-col items-center justify-center gap-1 transition-all ${
+            className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
               activeTab === 'weather' 
-                ? 'text-[#2A4B7C] scale-110 font-bold' 
+                ? 'text-[#2A4B7C] scale-105 font-bold' 
                 : 'text-gray-400 hover:text-slate-600'
             }`}
           >
-            <Map size={18} className={activeTab === 'weather' ? 'text-[#FF8E99]' : ''} />
-            <span className="text-[9px]">自駕地圖</span>
+            <Map size={16} className={activeTab === 'weather' ? 'text-[#FF8E99]' : ''} />
+            <span className="text-[8px]">自駕地圖</span>
           </button>
 
           <button 
             onClick={() => setActiveTab('guide')}
-            className={`flex flex-col items-center justify-center gap-1 transition-all ${
+            className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
               activeTab === 'guide' 
-                ? 'text-[#2A4B7C] scale-110 font-bold' 
+                ? 'text-[#2A4B7C] scale-105 font-bold' 
                 : 'text-gray-400 hover:text-slate-600'
             }`}
           >
-            <BookOpen size={18} className={activeTab === 'guide' ? 'text-[#FF8E99]' : ''} />
-            <span className="text-[9px]">旅行指南</span>
+            <BookOpen size={16} className={activeTab === 'guide' ? 'text-[#FF8E99]' : ''} />
+            <span className="text-[8px]">旅行指南</span>
           </button>
 
         </nav>
@@ -1924,7 +1924,7 @@ export default function App() {
               </div>
 
               {/* Modal Form Scrollable Area */}
-              <form onSubmit={handleSaveSpotForm} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs text-slate-700">
+              <form onSubmit={handleSaveSpotForm} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs text-slate-700 font-sans">
                 
                 {/* 景點名稱 & 時間 */}
                 <div className="grid grid-cols-3 gap-2">
@@ -1935,7 +1935,7 @@ export default function App() {
                       value={spotForm.time}
                       onChange={(e) => setSpotForm(prev => ({ ...prev, time: e.target.value }))}
                       placeholder="例如: 14:00"
-                      className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none font-sans"
+                      className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none"
                       required
                     />
                   </div>
@@ -1983,7 +1983,7 @@ export default function App() {
                 {/* 景點大類 & 停留時間 (改為雙下拉選單格式) */}
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-[10px] text-gray-400 font-bold mb-1">分類標籤</label>
+                    <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans">分類標籤</label>
                     <select
                       value={spotForm.category}
                       onChange={(e) => setSpotForm(prev => ({ ...prev, category: e.target.value }))}
@@ -2025,7 +2025,7 @@ export default function App() {
                 </div>
 
                 {/* 標記特殊標籤 (自選標記 必吃、必拍 與 必買) -> 更名為 景點標籤 */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 font-sans">
                   <label className="block text-[10px] text-gray-400 font-bold">景點標籤</label>
                   <div className="flex gap-2">
                     <button
@@ -2082,14 +2082,14 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* 詳細描述 (選填) -> 更名為行程備註 */}
+                {/* 行程備註(選填) */}
                 <div>
                   <label className="block text-[10px] text-gray-400 font-bold mb-1">行程備註(選填)</label>
                   <textarea 
                     value={spotForm.desc}
                     onChange={(e) => setSpotForm(prev => ({ ...prev, desc: e.target.value }))}
                     placeholder="請輸入今天這站景點的背景、想吃的美食或自駕預防要點...（選填）"
-                    className="w-full h-16 border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none resize-none"
+                    className="w-full h-16 border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none resize-none font-sans"
                   />
                 </div>
 
@@ -2101,14 +2101,14 @@ export default function App() {
                     value={spotForm.transitNext}
                     onChange={(e) => setSpotForm(prev => ({ ...prev, transitNext: e.target.value }))}
                     placeholder="例：自駕開往御船山樂園"
-                    className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none"
+                    className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none font-sans"
                   />
                 </div>
 
                 {/* Submit Action */}
                 <button
                   type="submit"
-                  className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white p-3 rounded-2xl shadow-md flex items-center justify-center gap-1.5 transition-all text-xs font-sans"
+                  className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white p-3 rounded-2xl shadow-md flex items-center justify-center gap-1.5 transition-all text-xs"
                 >
                   <Check size={14} />
                   <span>儲存變更行程點</span>
@@ -2126,8 +2126,8 @@ export default function App() {
               <div className="bg-red-50 text-red-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
                 <Trash2 size={24} />
               </div>
-              <div className="space-y-1 font-sans font-sans font-sans font-sans">
-                <h4 className="font-bold text-base text-slate-800 font-sans">確定刪除景點？</h4>
+              <div className="space-y-1 font-sans font-sans font-sans">
+                <h4 className="font-bold text-base text-slate-800">確定刪除景點？</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   您即將從行程中刪除「<span className="font-semibold text-red-500">{deleteTarget.spotName}</span>」。此動作無法復原。
                 </p>
@@ -2139,14 +2139,14 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setDeleteConfirmOpen(false)}
-                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl transition-all font-sans"
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl transition-all"
                 >
                   取消
                 </button>
                 <button
                   type="button"
                   onClick={confirmDeleteSpot}
-                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-2xl transition-all shadow-md shadow-red-500/20 font-sans"
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-2xl transition-all shadow-md shadow-red-500/20"
                 >
                   確認刪除
                 </button>
@@ -2157,7 +2157,7 @@ export default function App() {
 
         {/* ✨ 客製化防空值警告彈窗 (Custom Alert Dialog) */}
         {alertMessage && (
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans font-sans font-sans font-sans font-sans">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans font-sans font-sans font-sans">
             <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-scale-up space-y-4 text-center font-sans">
               <div className="bg-amber-50 text-amber-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
                 <Info size={24} />
@@ -2168,7 +2168,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setAlertMessage('')}
-                className="w-full py-2.5 bg-[#2A4B7C] hover:bg-blue-800 text-white text-xs font-bold rounded-2xl transition-all shadow-md font-sans"
+                className="w-full py-2.5 bg-[#2A4B7C] hover:bg-blue-800 text-white text-xs font-bold rounded-2xl transition-all shadow-md"
               >
                 確 定
               </button>
