@@ -11,7 +11,7 @@ const injectFont = () => {
   if (typeof window !== 'undefined' && !document.getElementById('zen-maru-font')) {
     const link = document.createElement('link');
     link.id = 'zen-maru-font';
-    link.relative = 'stylesheet';
+    link.rel = 'stylesheet'; // 修正屬性拼寫錯誤 link.relative -> link.rel
     link.href = 'https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Quicksand:wght@500;700&display=swap';
     document.head.appendChild(link);
   }
@@ -26,6 +26,11 @@ const getLocalStorageItem = (key, fallback) => {
   } catch (e) {
     return fallback;
   }
+};
+
+// 安全且不碰撞的 ID 產生器 (防止使用者快速點擊或批次處理時 React Key 衝突)
+const generateUniqueId = (prefix = 'id') => {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
 // 定義分類樣式對照表
@@ -302,7 +307,7 @@ const initialDaysData = [
         time: "17:00",
         name: "AKARIYA別館 ~横山邸~ 🏨",
         category: "酒店",
-        desc: "【本日住宿】極富昭和復古氛圍的唐津日式別館。擁有清雅私人日式庭園與榻榻米，享受日式古典生活。",
+        desc: "【本日住宿】極富昭和復古氛圍的唐津日式別館。擁有清雅私人和式庭園與榻榻米，享受日式古典生活。",
         stay: "一整晚",
         tags: [],
         navUrl: "https://www.booking.com/hotel/jp/akariyabie-guan-heng-shan-di.zh-tw.html",
@@ -470,8 +475,6 @@ export default function App() {
   const [itinerary, setItinerary] = useState(() => getLocalStorageItem('kyushu_itinerary_v2', initialDaysData));
 
   const [expenses, setExpenses] = useState(() => {
-    // 預設將實體訂房費用與對應行程中的「酒店景點」進行 spotId 連結綁定，展現高度無縫整合
-    // D2 酒店為 day2-spot6，D4 酒店為 day4-spot4，D5 酒店為 day5-spot5
     const defaultExpenses = [
       { id: 'exp-stay1', day: 1, date: '2026/06/24', category: '住宿', item: 'スコーレ第２天神 (D1住宿費)', amount: 5041, spotId: 'day1-spot5', spotName: 'スコーレ第２天神 (Scole No.2 Tenjin) 🏨' },
       { id: 'exp-stay2', day: 2, date: '2026/06/25', category: '住宿', item: '茜さす 肥前浜宿 (D2住宿費)', amount: 22467, spotId: 'day2-spot6', spotName: '茜さす 肥前浜宿 Akanesasu Hizenhamashuku 🏨' },
@@ -484,7 +487,6 @@ export default function App() {
   });
 
   const [packingList, setPackingList] = useState(() => {
-    // 套用使用者所提供的真實行李打包清單與結構，全數調整為 checked: false 確保不用示範打勾
     const defaultPacking = {
       personal: [
         { id: 'p1', text: '個人身分證件 (護照、身分證、簽證、國際駕照)', checked: false },
@@ -592,13 +594,20 @@ export default function App() {
   // 4. 衍生計算變數 (Derived Variables)
   // --------------------------------------------------------
   const totalBudget = 245000; // JPY 總預算
-  const totalSpentJPY = expenses.reduce((sum, item) => sum + Number(item?.amount || 0), 0);
+  
+  // 型態安全保護，使用 parseFloat 並加入 isNaN 防禦，防止非預期格式導致總支出顯示為 NaN 而崩潰
+  const totalSpentJPY = expenses.reduce((sum, item) => {
+    const amt = parseFloat(item?.amount);
+    return sum + (isNaN(amt) ? 0 : amt);
+  }, 0);
   const totalSpentTWD = Math.round(totalSpentJPY * 0.21); // 匯率參考
   const progressPercent = Math.min(100, Math.round((totalSpentJPY / totalBudget) * 100));
 
   const categoryBreakdown = expenses.reduce((acc, curr) => {
     if (curr) {
-      acc[curr.category] = (acc[curr.category] || 0) + Number(curr.amount || 0);
+      const amt = parseFloat(curr.amount);
+      const safeAmt = isNaN(amt) ? 0 : amt;
+      acc[curr.category] = (acc[curr.category] || 0) + safeAmt;
     }
     return acc;
   }, {});
@@ -608,11 +617,11 @@ export default function App() {
   // --------------------------------------------------------
   // 5. 實用輔助工具函式
   // --------------------------------------------------------
-  // 估算時間加 30 分鐘工具，協助實現在其後指示插入行程加 30 分鐘 the 預估時間
+  // 估算時間加 30 分鐘工具，防禦性無效時間格式的預設回傳值與預設時間「08:00」完全對齊
   const addMinutesToTime = (timeStr, minsToAdd) => {
-    if (!timeStr || !timeStr.includes(':')) return '08:30';
+    if (!timeStr || !timeStr.includes(':')) return '08:00';
     const [hours, minutes] = timeStr.split(':').map(Number);
-    if (isNaN(hours) || isNaN(minutes)) return '08:30';
+    if (isNaN(hours) || isNaN(minutes)) return '08:00';
     let newMins = minutes + minsToAdd;
     let newHours = hours + Math.floor(newMins / 60);
     newMins = newMins % 60;
@@ -641,7 +650,7 @@ export default function App() {
     e.preventDefault();
     if (!newItemText.trim()) return;
     const newItem = {
-      id: 'custom-' + Date.now(),
+      id: generateUniqueId('packing'), // 修復客製化行李 ID 碰撞風險
       text: newItemText,
       checked: false
     };
@@ -748,7 +757,7 @@ export default function App() {
           newSpots = newSpots.map(s => s.id === editingSpotId ? { ...s, ...finalForm } : s);
         } else {
           const newSpot = {
-            id: 'custom-spot-' + Date.now(),
+            id: generateUniqueId('spot'), // 修復客製化景點 ID 碰撞風險
             ...finalForm
           };
           newSpots.splice(modalInsertIndex, 0, newSpot);
@@ -785,23 +794,21 @@ export default function App() {
     setDeleteTarget({ dayNum: null, spotId: null, spotName: '' });
   };
 
-  // 獨立/一般消費記帳登錄
+  // 獨立/一般消費記帳登錄 (修復手動記帳 Bug：改為透過動態比對 itinerary 的日期進行精確歸類)
   const handleAddExpenseManual = (e) => {
     e.preventDefault();
     if (!expFormItem.trim() || !expFormAmount) return;
     
-    const dateMapping = {
-      '2026/06/24': 1, '2026/06/25': 2, '2026/06/26': 3,
-      '2026/06/27': 4, '2026/06/28': 5, '2026/06/29': 6, '2026/06/30': 7
-    };
+    const foundDay = itinerary.find(d => d.date.includes(expFormDate));
+    const dayNum = foundDay ? foundDay.day : 1;
 
     const newExp = {
-      id: 'exp-' + Date.now(),
-      day: dateMapping[expFormDate] || 1,
+      id: generateUniqueId('exp'), // 修復客製化記帳 ID 碰撞風險
+      day: dayNum,
       date: expFormDate,
       category: expFormCategory,
       item: expFormItem,
-      amount: parseInt(expFormAmount)
+      amount: parseInt(expFormAmount, 10) || 0
     };
 
     setExpenses(prev => [...prev, newExp]);
@@ -836,12 +843,12 @@ export default function App() {
     }
 
     const newExp = {
-      id: 'exp-' + Date.now(),
+      id: generateUniqueId('exp'), // 修復客製化內嵌記帳 ID 碰撞風險
       day: dayNum,
       date: dateStr.split(' ')[0], // 去除星期備註
       category: category,
       item: itemName,
-      amount: parseInt(amount),
+      amount: parseInt(amount, 10) || 0,
       spotId: spot.id,
       spotName: spot.name
     };
@@ -949,12 +956,12 @@ export default function App() {
               <span className="font-bold text-sm text-white">￥{totalSpentJPY.toLocaleString()}</span>
             </div>
             <div className="bg-white/5 py-1 rounded-lg border border-white/5">
-              <span className="text-[10px] text-blue-200 block">台幣等值</span>
-              <span className="font-bold text-sm text-yellow-100 font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold">NT$ {totalSpentTWD.toLocaleString()}</span>
+              <span className="text-[10px] text-blue-200 block font-sans">台幣等值</span>
+              <span className="font-bold text-sm text-yellow-100">NT$ {totalSpentTWD.toLocaleString()}</span>
             </div>
             <div className="bg-white/5 py-1 rounded-lg border border-white/5">
               <span className="text-[8px] text-blue-200 block">剩餘預算</span>
-              <span className="font-bold text-xs text-emerald-300 font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold font-bold">￥{(totalBudget - totalSpentJPY).toLocaleString()}</span>
+              <span className="font-bold text-xs text-emerald-300">￥{(totalBudget - totalSpentJPY).toLocaleString()}</span>
             </div>
           </div>
         </header>
@@ -1310,7 +1317,7 @@ export default function App() {
 
                 <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/10 text-center">
                   <div>
-                    <span className="text-[10px] text-blue-200 block font-sans font-sans font-sans font-sans font-sans font-sans">實際累計支出 (日圓)</span>
+                    <span className="text-[10px] text-blue-200 block font-sans font-sans font-sans font-sans font-sans">實際累計支出 (日圓)</span>
                     <span className="font-bold text-lg text-white font-sans font-sans font-sans font-sans font-sans font-sans font-sans">￥{totalSpentJPY.toLocaleString()}</span>
                   </div>
                   <div>
@@ -1321,8 +1328,8 @@ export default function App() {
               </div>
 
               {/* 📥 智慧 Excel 一鍵匯出按鈕區塊 */}
-              <div className="bg-white rounded-3xl p-4 shadow-md border border-[#E9ECF0] text-center space-y-2 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
-                <p className="text-xs text-[#5D6D7E] leading-relaxed font-sans font-sans font-sans">
+              <div className="bg-white rounded-3xl p-4 shadow-md border border-[#E9ECF0] text-center space-y-2 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+                <p className="text-xs text-[#5D6D7E] leading-relaxed font-sans">
                   想要整理紙本或者與旅伴分攤費用嗎？您可以一鍵將「所有每日行程、住宿資訊、記帳流水帳、打包準備清單」以 Excel (CSV) 格式打包匯出！
                 </p>
                 <button 
@@ -1336,7 +1343,7 @@ export default function App() {
 
               {/* 手動獨立登錄費用紀錄表單 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans font-sans font-sans">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
                   <Plus size={14} className="text-[#FF8E99]" />
                   <span>新增常規獨立花費 (如：ETC儲值、免稅採購)</span>
                 </span>
@@ -1361,11 +1368,11 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans">費用類別</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans">費用類別</label>
                       <select 
                         value={expFormCategory}
                         onChange={(e) => setExpFormCategory(e.target.value)}
-                        className="w-full text-xs border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-700 font-sans font-sans font-sans font-sans font-sans font-sans font-sans"
+                        className="w-full text-xs border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-700 font-sans"
                       >
                         <option value="食物">🍜 食物</option>
                         <option value="購物">🛍 購物</option>
@@ -1377,15 +1384,15 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+                  <div className="grid grid-cols-3 gap-2 font-sans font-sans font-sans font-sans font-sans">
                     <div className="col-span-2">
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">消費項目名稱</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans font-sans font-sans font-sans">消費項目名稱</label>
                       <input 
                         type="text" 
                         value={expFormItem}
                         onChange={(e) => setExpFormItem(e.target.value)}
                         placeholder="例：自駕油錢、免稅藥妝..."
-                        className="w-full text-xs border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] text-slate-700 font-sans font-sans"
+                        className="w-full text-xs border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] text-slate-700 font-sans"
                       />
                     </div>
                     <div>
@@ -1395,7 +1402,7 @@ export default function App() {
                         value={expFormAmount}
                         onChange={(e) => setExpFormAmount(e.target.value)}
                         placeholder="1200"
-                        className="w-full text-xs border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] text-slate-700 font-sans font-sans font-sans"
+                        className="w-full text-xs border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] text-slate-700 font-sans font-sans"
                       />
                     </div>
                   </div>
@@ -1403,7 +1410,7 @@ export default function App() {
                   <button 
                     type="submit"
                     disabled={!expFormItem.trim() || !expFormAmount}
-                    className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white p-2 px-3 py-2 rounded-xl hover:bg-[#1E3A5F] font-bold text-xs transition-all flex items-center justify-center gap-1 font-sans font-sans font-sans font-sans font-sans font-sans"
+                    className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white p-2 px-3 py-2 rounded-xl hover:bg-[#1E3A5F] font-bold text-xs transition-all flex items-center justify-center gap-1 font-sans font-sans font-sans font-sans font-sans"
                   >
                     <Plus size={13} />
                     <span>登錄常規消費</span>
@@ -1419,9 +1426,9 @@ export default function App() {
                     const amt = categoryBreakdown[cat];
                     const percent = Math.round((amt / totalSpentJPY) * 100);
                     return (
-                      <div key={cat} className="bg-slate-50 rounded-2xl p-2.5 text-center border border-gray-100 font-sans font-sans font-sans font-sans font-sans font-sans">
+                      <div key={cat} className="bg-slate-50 rounded-2xl p-2.5 text-center border border-gray-100 font-sans font-sans font-sans font-sans font-sans">
                         <span className="text-[10px] text-gray-400 block">{cat}</span>
-                        <strong className="text-xs text-slate-800 block mt-0.5 font-sans font-sans font-sans font-sans font-sans">￥{amt.toLocaleString()}</strong>
+                        <strong className="text-xs text-slate-800 block mt-0.5">￥{amt.toLocaleString()}</strong>
                         <span className="text-[9px] text-[#2A4B7C] block font-sans font-sans font-sans">{percent}%</span>
                       </div>
                     );
@@ -1431,16 +1438,16 @@ export default function App() {
 
               {/* 詳細費用記帳明細流 (完美整合景點與一般記帳) */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans font-sans font-sans font-sans font-sans">
-                <div className="flex justify-between items-center font-sans font-sans font-sans">
-                  <span className="text-xs font-bold text-slate-800 font-sans font-sans">已登錄消費流水明細</span>
+                <div className="flex justify-between items-center font-sans font-sans">
+                  <span className="text-xs font-bold text-slate-800 font-sans font-sans font-sans">已登錄消費流水明細</span>
                   <span className="text-[10px] text-gray-400">共 {expenses.length} 筆款項</span>
                 </div>
 
-                <div className="space-y-2 divide-y divide-gray-100 pr-1 max-h-[40vh] overflow-y-auto font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+                <div className="space-y-2 divide-y divide-gray-100 pr-1 max-h-[40vh] overflow-y-auto font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
                   {expenses.slice().reverse().map(item => {
                     const style = getCategoryStyle(item.category);
                     return (
-                      <div key={item.id} className="pt-2.5 flex items-center justify-between gap-2 hover:bg-slate-50/50 rounded-xl px-1 transition-colors font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+                      <div key={item.id} className="pt-2.5 flex items-center justify-between gap-2 hover:bg-slate-50/50 rounded-xl px-1 transition-colors font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
                         <div className="flex items-center gap-2.5 min-w-0 font-sans">
                           <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] ${style.dot} text-white shrink-0`}>
                             {item.category === '食物' && <Utensils size={12} />}
@@ -1450,12 +1457,12 @@ export default function App() {
                             {item.category === '住宿' && <Hotel size={12} />}
                             {item.category === '其他' && <FileText size={12} />}
                           </span>
-                          <div className="truncate font-sans font-sans font-sans font-sans font-sans font-sans">
-                            <span className="text-xs font-bold text-slate-800 block truncate font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">{item.item}</span>
+                          <div className="truncate font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+                            <span className="text-xs font-bold text-slate-800 block truncate font-sans font-sans font-sans font-sans font-sans font-sans">{item.item}</span>
                             
                             {/* 顯示景點綁定狀態 */}
                             {item.spotName ? (
-                              <span className="text-[10px] text-blue-600 font-bold block mt-0.5 font-sans font-sans font-sans font-sans font-sans font-sans">
+                              <span className="text-[10px] text-blue-600 font-bold block mt-0.5 font-sans font-sans font-sans">
                                 📍 於: {item.spotName}
                               </span>
                             ) : (
@@ -1467,7 +1474,7 @@ export default function App() {
                         <div className="flex items-center gap-2 shrink-0">
                           <div className="text-right">
                             <span className="text-xs font-bold text-slate-800 block font-sans">￥{item.amount.toLocaleString()}</span>
-                            <span className="text-[9px] text-gray-400 block font-sans">約 NT$ {Math.round(item.amount * 0.21)}</span>
+                            <span className="text-[9px] text-gray-400 block font-sans font-sans font-sans font-sans">約 NT$ {Math.round(item.amount * 0.21)}</span>
                           </div>
                           
                           <button 
@@ -1536,7 +1543,7 @@ export default function App() {
                     </g>
                     <g transform="translate(140,100)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-35" y="-6" className="text-[9px] font-bold fill-[#4A5568] font-sans">佐賀市</text>
+                      <text x="-35" y="-6" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans">佐賀市</text>
                     </g>
                     <g transform="translate(110,160)">
                       <circle r="5" fill="#2A4B7C" />
@@ -1552,15 +1559,15 @@ export default function App() {
                     </g>
                     <g transform="translate(50,80)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-40" y="2" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans font-sans">伊萬里</text>
+                      <text x="-40" y="2" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans">伊萬里</text>
                     </g>
                     <g transform="translate(90,50)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans">唐津城</text>
+                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans">唐津城</text>
                     </g>
                     <g transform="translate(145,40)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="0" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans font-sans font-sans font-sans font-sans">糸島半島</text>
+                      <text x="0" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans">糸島半島</text>
                     </g>
 
                     <text x="100" y="110" className="text-sm">✈</text>
@@ -1572,7 +1579,7 @@ export default function App() {
               {/* 氣象與每日降雨預報表 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans">
                 <span className="text-xs font-bold text-gray-400 block uppercase font-sans">每日區域預報 (2026/06/24 - 06/30)</span>
-                <div className="divide-y divide-gray-100 font-sans font-sans font-sans">
+                <div className="divide-y divide-gray-100 font-sans font-sans font-sans font-sans font-sans">
                   {itinerary.map(d => (
                     <div key={d.day} className="py-3 flex items-center justify-between gap-2 animate-fade-in font-sans">
                       <div className="flex items-center gap-2">
@@ -1580,15 +1587,15 @@ export default function App() {
                           D{d.day}
                         </span>
                         <div>
-                          <span className="text-xs font-bold text-slate-800 block font-sans">{d.area}</span>
+                          <span className="text-xs font-bold text-slate-800 block">{d.area}</span>
                           <span className="text-[9px] text-gray-400 block font-sans">{d.date.split(' ')[0]}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
                         <div className="text-right font-sans font-sans">
-                          <span className="text-xs font-bold font-sans text-slate-700 block">{d.temp}</span>
-                          <span className="text-[9px] text-gray-400 block">體感約 28°C</span>
+                          <span className="text-xs font-bold font-sans text-slate-700 block font-sans font-sans">{d.temp}</span>
+                          <span className="text-[9px] text-gray-400 block font-sans">體感約 28°C</span>
                         </div>
 
                         <div className="bg-[#F5F7FA] p-2 rounded-2xl flex items-center gap-1.5 border border-gray-100">
@@ -1597,9 +1604,9 @@ export default function App() {
                           ) : (
                             <CloudSun size={16} className="text-orange-400" />
                           )}
-                          <div className="text-left font-sans font-sans">
-                            <span className="text-[9px] text-gray-400 block font-sans">降雨機率</span>
-                            <span className="text-[10px] font-bold text-[#2A4B7C] block font-sans font-sans font-sans font-sans font-sans font-sans">{d.rainChance}</span>
+                          <div className="text-left font-sans">
+                            <span className="text-[9px] text-gray-400 block">降雨機率</span>
+                            <span className="text-[10px] font-bold text-[#2A4B7C] block font-sans font-sans font-sans">{d.rainChance}</span>
                           </div>
                         </div>
                       </div>
@@ -1621,7 +1628,7 @@ export default function App() {
               <div className="bg-gradient-to-br from-[#2A4B7C] to-[#436496] rounded-3xl p-4 text-white shadow-md space-y-2">
                 <div className="flex items-center gap-1.5 text-yellow-200">
                   <BookOpen size={16} />
-                  <span className="text-xs font-bold uppercase tracking-wider font-sans font-sans">旅行工具箱 ＆ 行前準備</span>
+                  <span className="text-xs font-bold uppercase tracking-wider font-sans">旅行工具箱 ＆ 行前準備</span>
                 </div>
                 <h3 className="text-base font-bold font-sans">九州自由行・數位隨身錦囊</h3>
                 <p className="text-xs text-blue-100 leading-relaxed font-sans font-sans">
@@ -1631,7 +1638,7 @@ export default function App() {
 
               {/* 1. 行李清單管理庫 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-4">
-                <div className="flex justify-between items-center font-sans font-sans font-sans">
+                <div className="flex justify-between items-center font-sans font-sans font-sans font-sans">
                   <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                     <CheckSquare size={14} className="text-[#FF8E99]" />
                     <span>行李打包與準備清單</span>
@@ -1663,15 +1670,15 @@ export default function App() {
                 <div className="space-y-4 pt-1 font-sans">
                   {/* Category: 隨身行李 */}
                   <div className="space-y-2.5">
-                    <h4 className="text-xs font-bold text-[#2A4B7C] bg-[#EAF2F8] px-2.5 py-1 rounded-lg w-max font-sans font-sans">
+                    <h4 className="text-xs font-bold text-[#2A4B7C] bg-[#EAF2F8] px-2.5 py-1 rounded-lg w-max font-sans">
                       💼 隨身行李 (證件、貴重與隨身物品)
                     </h4>
-                    <div className="space-y-1.5 font-sans font-sans font-sans font-sans font-sans">
+                    <div className="space-y-1.5 font-sans font-sans font-sans">
                       {packingList.personal.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-all border border-gray-100 font-sans font-sans font-sans">
+                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-all border border-gray-100 font-sans font-sans font-sans font-sans">
                           
-                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans">
-                            <span onClick={() => toggleItem('personal', item.id)} className="shrink-0 font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
+                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans font-sans font-sans font-sans">
+                            <span onClick={() => toggleItem('personal', item.id)} className="shrink-0 font-sans">
                               {item.checked ? (
                                 <CheckSquare size={16} className="text-[#FF8E99]" />
                               ) : (
@@ -1684,7 +1691,7 @@ export default function App() {
                                 type="text"
                                 value={item.text}
                                 onChange={(e) => handleEditPackingText('personal', item.id, e.target.value)}
-                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
                               />
                             ) : (
                               <span 
@@ -1715,11 +1722,11 @@ export default function App() {
                     <h4 className="text-xs font-bold text-[#C68D00] bg-yellow-50 px-2.5 py-1 rounded-lg w-max font-sans font-sans">
                       🧳 託運行李 (大行李箱與個人裝備)
                     </h4>
-                    <div className="space-y-1.5 font-sans font-sans">
+                    <div className="space-y-1.5">
                       {packingList.checked.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-[#F5F7FA] rounded-xl transition-all border border-gray-100 font-sans font-sans font-sans font-sans">
+                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-[#F5F7FA] rounded-xl transition-all border border-gray-100 font-sans font-sans">
                           
-                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans font-sans font-sans font-sans font-sans">
+                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans font-sans">
                             <span onClick={() => toggleItem('checked', item.id)} className="shrink-0 font-sans">
                               {item.checked ? (
                                 <CheckSquare size={16} className="text-[#E6AF2E]" />
@@ -1733,7 +1740,7 @@ export default function App() {
                                 type="text"
                                 value={item.text}
                                 onChange={(e) => handleEditPackingText('checked', item.id, e.target.value)}
-                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
                               />
                             ) : (
                               <span 
@@ -1761,7 +1768,7 @@ export default function App() {
                 </div>
 
                 {/* 新增自訂物品表單 */}
-                <form onSubmit={handleAddItem} className="pt-3.5 border-t border-gray-100 flex gap-2 font-sans">
+                <form onSubmit={handleAddItem} className="pt-3.5 border-t border-gray-100 flex gap-2 font-sans font-sans">
                   <select
                     value={newItemCategory}
                     onChange={(e) => setNewItemCategory(e.target.value)}
@@ -1784,18 +1791,18 @@ export default function App() {
               </div>
 
               {/* 住宿確認 ── 已更正為「住宿資訊」 */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans font-sans font-sans">
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                   <FileText size={14} className="text-emerald-600" />
                   <span>住宿資訊</span>
                 </span>
                 
-                <div className="space-y-2.5 font-sans font-sans">
+                <div className="space-y-2.5 font-sans font-sans font-sans">
                   {itinerary.filter(d => d.spots.some(s => s.category === '酒店')).map(d => {
                     const hotelSpot = d.spots.find(s => s.category === '酒店');
                     return (
                       <div key={d.day} className="border border-emerald-100 rounded-2xl p-3 bg-emerald-50/20 flex justify-between items-center font-sans font-sans">
-                        <div className="flex-1 pr-2 min-w-0">
+                        <div className="flex-1 pr-2 min-w-0 font-sans">
                           <span className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase font-sans">
                             D{d.day} ({d.date.split(' ')[0]})
                           </span>
@@ -1806,7 +1813,7 @@ export default function App() {
                           href={hotelSpot.navUrl} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          className="bg-emerald-600 text-white font-bold text-[10px] px-3 py-2 rounded-xl shrink-0 hover:bg-emerald-700 transition-colors text-center w-24"
+                          className="bg-emerald-600 text-white font-bold text-[10px] px-3 py-2 rounded-xl shrink-0 hover:bg-emerald-700 transition-colors text-center w-24 font-sans font-sans"
                         >
                           住宿資訊
                         </a>
@@ -1817,12 +1824,12 @@ export default function App() {
               </div>
 
               {/* 日本自駕規則提醒 */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans">
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
                 <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                   <Info size={14} className="text-blue-500" />
                   <span>自駕安全與 ETC 退稅指引</span>
                 </span>
-                <ul className="text-xs text-[#5D6D7E] space-y-2 list-disc pl-4 leading-relaxed font-sans">
+                <ul className="text-xs text-[#5D6D7E] space-y-2 list-disc pl-4 leading-relaxed font-sans font-sans">
                   <li><strong>靠左行駛</strong>：日本方向盤及車道均相反，請隨時提醒自己「靠左慢行」。</li>
                   <li><strong>行人優先</strong>：斑白線前若有行人，請務必完全靜止禮讓。</li>
                   <li><strong>過路費/ETC</strong>：自駕上高速公路建議使用 ETC 卡片，方便進出閘道。</li>
@@ -1835,7 +1842,7 @@ export default function App() {
         </main>
 
         {/* BOTTOM FLOATING NAV BAR */}
-        <nav className="absolute bottom-3 left-4 right-4 bg-white/80 backdrop-blur-xl rounded-2xl py-2 px-3 shadow-xl border border-white/40 flex justify-around items-center z-40 animate-fade-in font-sans">
+        <nav className="absolute bottom-3 left-4 right-4 bg-white/80 backdrop-blur-xl rounded-2xl py-2 px-3 shadow-xl border border-white/40 flex justify-around items-center z-40 animate-fade-in font-sans font-sans">
           
           <button 
             onClick={() => setActiveTab('itinerary')}
@@ -2003,7 +2010,7 @@ export default function App() {
                     <select
                       value={stayMinutes}
                       onChange={(e) => setStayMinutes(parseInt(e.target.value))}
-                      className="w-full border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#2A4B7C]"
+                      className="w-full border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#2A4B7C] font-sans"
                     >
                       <option value={0}>0 分鐘</option>
                       <option value={30}>30 分鐘</option>
@@ -2071,7 +2078,7 @@ export default function App() {
 
                 {/* 詳細描述 (選填) -> 更名為行程備註 */}
                 <div>
-                  <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans">行程備註(選填)</label>
+                  <label className="block text-[10px] text-gray-400 font-bold mb-1">行程備註(選填)</label>
                   <textarea 
                     value={spotForm.desc}
                     onChange={(e) => setSpotForm(prev => ({ ...prev, desc: e.target.value }))}
@@ -2133,7 +2140,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={confirmDeleteSpot}
-                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-2xl transition-all shadow-md shadow-red-500/20"
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-2xl transition-all shadow-md shadow-red-500/20 font-sans"
                 >
                   確認刪除
                 </button>
@@ -2144,7 +2151,7 @@ export default function App() {
 
         {/* ✨ 客製化防空值警告彈窗 (Custom Alert Dialog) */}
         {alertMessage && (
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans font-sans font-sans font-sans">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans font-sans">
             <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-scale-up space-y-4 text-center font-sans">
               <div className="bg-amber-50 text-amber-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
                 <Info size={24} />
@@ -2155,7 +2162,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setAlertMessage('')}
-                className="w-full py-2.5 bg-[#2A4B7C] hover:bg-blue-800 text-white text-xs font-bold rounded-2xl transition-all shadow-md font-sans"
+                className="w-full py-2.5 bg-[#2A4B7C] hover:bg-blue-800 text-white text-xs font-bold rounded-2xl transition-all shadow-md"
               >
                 確 定
               </button>
