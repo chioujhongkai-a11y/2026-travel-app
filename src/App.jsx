@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  MapPin, Calendar, Camera, Compass, Utensils, ShoppingBag, 
-  Navigation, Car, CloudRain, Sun, CloudSun, Umbrella, 
-  CheckSquare, Square, Plus, Trash2, Plane, Hotel, 
-  ShieldAlert, Phone, Map, Sparkles, BookOpen, ChevronRight, 
-  ChevronLeft, Heart, Info, FileText, Check, Upload, Smile, Eye,
-  MessageSquare, Send, X, Bot, HelpCircle, RefreshCw, ChevronDown, ChevronUp,
-  Download, Key, Edit, Save, Trash
+  Calendar, Compass, Utensils, ShoppingBag, Navigation, Car, 
+  CloudRain, Sun, CloudSun, CheckSquare, Square, Plus, Trash2, 
+  Hotel, Map, Sparkles, BookOpen, Info, FileText, Check, 
+  Smile, X, ChevronDown, ChevronUp, Download, Edit, Save, MapPin,
+  Trash
 } from 'lucide-react';
 
 // 動態載入日系 Zen Maru Gothic 圓體與 Quicksand 英文字型
@@ -18,35 +16,6 @@ const injectFont = () => {
     link.href = 'https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Quicksand:wght@500;700&display=swap';
     document.head.appendChild(link);
   }
-};
-
-// 前端圖片壓縮工具 (等比例縮放 + 降低壓縮畫質，大幅提升 OCR 辨識速度並防止儲存空間溢出)
-const compressImage = (base64Str, maxWidth = 1024, quality = 0.7) => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = base64Str;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
-
-      // 等比例縮小到指定的最大寬度
-      if (width > maxWidth) {
-        height = Math.round((height * maxWidth) / width);
-        width = maxWidth;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // 壓縮為 jpeg，並指定畫質，大幅減少檔案體積
-      const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-      resolve(compressedBase64);
-    };
-  });
 };
 
 // 定義分類樣式對照表
@@ -84,26 +53,19 @@ const initialDaysData = [
         stay: "1 小時",
         tags: ["必拍"],
         photoTip: "入境大廳設有九州特色彩繪打卡牆與熊本熊，適合拍下第一張合照！",
-        navUrl: "https://maps.google.com/?q=Fukuoka+Airport",
-        parking: "無需自駕。市區地鐵轉乘非常便利。",
-        gas: "不適用 (今日為純地鐵行程)",
-        transitNext: "搭乘地下鐵空港線往博多車站",
-        transitTime: "15 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Fukuoka+Airport",
+        transitNext: "搭乘地下鐵空港線往博多車站"
       },
       {
         id: "day1-spot2",
         time: "11:30",
         name: "博多車站寄放行李 ＆ 買點心伴手禮",
         category: "購物",
-        desc: "博多車站尋找置物櫃寄放行李。漫步 MING 名產街選購點心伴手禮（如博多通饅頭或福砂屋）。",
+        desc: "博多車站尋找置物櫃寄放行李。漫步 MING 名產街選購點心伴手禮（如博多通饅頭 or 福砂屋）。",
         stay: "45 分鐘",
         tags: ["必吃", "必買"],
-        photoTip: "博多車站頂樓「屋頂鐵道神社」可拍攝紅色小鳥居並俯看博多街景！",
-        navUrl: "https://maps.google.com/?q=Hakata+Station",
-        parking: "博多車站地下停車場 (今日不推薦自駕，明日開始)。",
-        gas: "不適用。",
-        transitNext: "博多口西日本銀行前搭 58 號公車",
-        transitTime: "25 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Hakata+Station",
+        transitNext: "博多口西日本銀行前搭 58 號公車"
       },
       {
         id: "day1-spot3",
@@ -113,27 +75,19 @@ const initialDaysData = [
         desc: "綠意盎然的都市綠洲。擁有熱帶溫室與多樣化動物區，可以近距離與可愛動物互動野餐。",
         stay: "3 小時",
         tags: ["必拍"],
-        photoTip: "巨大幾何玻璃溫室背景極美，水豚區也是拍照亮點！",
-        navUrl: "https://maps.google.com/?q=Fukuoka+City+Zoological+and+Botanical+Garden",
-        parking: "植物園專用有料停車場 (平日 500 日圓/次)。",
-        gas: "不適用。",
-        transitNext: "搭乘公車回到中洲屋台街",
-        transitTime: "20 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Fukuoka+City+Zoological+and+Botanical+Garden",
+        transitNext: "搭乘公車回到博多友都八喜"
       },
       {
         id: "day1-spot4",
         time: "18:00",
-        name: "中洲屋台街 ─ 享用深夜豚骨拉麵",
-        category: "食物",
-        desc: "沿那珂川一字排開的博多傳統大排檔屋台. 品嚐正宗博多豚骨拉麵與烤物，體驗在地風味。",
-        stay: "2 小時",
-        tags: ["必吃", "必拍"],
-        photoTip: "站在對岸橋頭，將紅燈籠亮起與川面倒影拍下，昭和煙火氣十足！",
-        navUrl: "https://maps.google.com/?q=Nakasu+Yatai",
-        parking: "Keep 臨停停車場即可。",
-        gas: "不適用。",
-        transitNext: "步行前往天神公寓旅店",
-        transitTime: "10 分鐘"
+        name: "LOPIA 博多友都八喜店 (Yodobashi) 🛒",
+        category: "購物",
+        desc: "前往博多車站旁的 Yodobashi 地下LOPIA超人氣超市，採購今晚美味晚餐、各類日系熟食熟肉、水果與隔日自駕路上享用的豐富早餐。這裡有多樣平價的高品質熟食可供選擇！",
+        stay: "1.5 小時",
+        tags: ["必吃", "必買"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=LOPIA+Yodobashi+Hakata",
+        transitNext: "提著滿載物資步行前往天神飯店"
       },
       {
         id: "day1-spot5",
@@ -142,13 +96,9 @@ const initialDaysData = [
         category: "酒店",
         desc: "【本日住宿】位於天神中心的舒適公寓住宿。生活家電齊備，臨近天神商圈，是明日自駕出發前的優質基地！",
         stay: "一整晚",
-        tags: ["必拍"],
-        photoTip: "客廳和風榻榻米擺設極美，適合將今天採購的伴手禮一字排開拍合照！",
+        tags: [],
         navUrl: "https://www.booking.com/hotel/jp/yin-mifang-ti-karaokeoguo-zi-shi-befang-ti-fu-yuan-yin-shi-dian-noentateimentowu.zh-tw.html",
-        parking: "公寓旁設有多個合作的有料立體停車場。",
-        gas: "不適用。",
-        transitNext: "無，今晚於天神公寓入眠 🌙",
-        transitTime: "不適用"
+        transitNext: "無，今晚於天神公寓入眠 🌙"
       }
     ]
   },
@@ -169,12 +119,8 @@ const initialDaysData = [
         desc: "租車出發！攜帶護照、駕照正本與譯本前往祇園店辦理取車，已投保全險。",
         stay: "30 分鐘",
         tags: [],
-        photoTip: "出車前，和同行旅伴在店門前與愛車拍張「自駕起航」紀念照！",
         navUrl: "https://goo.gl/maps/jaTeDTkjrLdyhj5aA",
-        parking: "租車店舖前有裝運、取車位。",
-        gas: "祇園店對角有 ENEOS 加油站，還車加滿極方便。",
-        transitNext: "行經高速公路開往佐賀神埼",
-        transitTime: "50 分鐘"
+        transitNext: "行經高速公路開往佐賀神埼"
       },
       {
         id: "day2-spot2",
@@ -184,27 +130,19 @@ const initialDaysData = [
         desc: "全日本最大規模 of 彌生時代部落遺跡。重現兩千多年前的聚落、高床式倉庫與古人神秘生活。",
         stay: "2 小時",
         tags: ["必拍"],
-        photoTip: "登上北內郭的主瞭望台，從最頂層俯拍整片草帽古村落，極具動漫感！",
-        navUrl: "https://maps.google.com/?q=Yoshinogari+Historical+Park",
-        parking: "公園附設大型自駕收費停車場 (小客車 310 日圓/天)。",
-        gas: "出口 3 分鐘處有 ENEOS神埼加油站。",
-        transitNext: "開車至佐賀市區熱氣球博物館",
-        transitTime: "25 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Yoshinogari+Historical+Park",
+        transitNext: "開車至佐賀市區參觀熱氣球與本丸"
       },
       {
         id: "day2-spot3",
-        time: "12:00",
-        name: "佐賀熱氣球博物館 ＆ 豪華午餐佐賀牛 🎈",
+        time: "11:00",
+        name: "佐賀熱氣球博物館 ＆ 佐賀城本丸歷史館 🎈🏯",
         category: "景點",
-        desc: "熱氣球主題博物館，擁有 280 吋動態大螢幕。中午前往名店「季樂」品嚐頂級「佐賀牛」鐵板燒。",
+        desc: "參觀熱氣球主題博物館，擁有 280 吋動態大螢幕與飛行模擬體驗。接著造訪佐賀城本丸歷史館，參觀日本最大規模的木造復原建築，深度感受佐賀藩的歷史底蘊與幕末領先日本的科學發展成果。不在此安排佐賀牛大餐說明。",
         stay: "2.5 小時",
-        tags: ["必吃", "必拍"],
-        photoTip: "熱氣球飛行器拍照極富科技感。佐賀牛油脂香熱發亮時切記錄影！",
-        navUrl: "https://maps.google.com/?q=Saga+Balloon+Museum",
-        parking: "博物館合作特約收費停車場 (可享折抵)。",
-        gas: "佐賀市中心 ENEOS 加油站。",
-        transitNext: "開車沿國道 207 號南下往太良町",
-        transitTime: "55 分鐘"
+        tags: ["必拍"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Saga+Balloon+Museum",
+        transitNext: "開車沿國道 207 號南下往太良町"
       },
       {
         id: "day2-spot4",
@@ -214,27 +152,30 @@ const initialDaysData = [
         desc: "矗立在潮汐中的三座朱紅色海上鳥居。滿潮時沒入海中，退潮時能步行走在底下。",
         stay: "1.5 小時",
         tags: ["必拍"],
-        photoTip: "退潮時可步行走近鳥居，滿潮時紅色鳥居沒入海水，餘暉映照下夢幻異常！",
-        navUrl: "https://www.booking.com/hotel/jp/qian-sasu-fei-qian-bang-su.zh-tw.html",
-        parking: "神社旁有免費住客臨停停車格 (約可停 15 台).",
-        gas: "JA 太良自營加油站 (車程 4 分鐘).",
-        transitNext: "開車前往肥前濱宿老街宿",
-        transitTime: "40 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Oouo+Shrii+Torii+in+the+Sea",
+        transitNext: "開車前往祐德稻荷神社"
       },
       {
         id: "day2-spot5",
-        time: "17:30",
+        time: "17:00",
+        name: "祐德稻荷神社 ⛩",
+        category: "景點",
+        desc: "日本三大稻荷神社之一。依山麓而建的巍峨紅色本殿壯麗無比，擁有宛如清水寺的木造高架舞台。漫步參拜，登上御本殿祈福。",
+        stay: "1.5 小時",
+        tags: ["必拍"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Yutoku+Inari+Shrine",
+        transitNext: "開車前往肥前濱宿老街住宿"
+      },
+      {
+        id: "day2-spot6",
+        time: "18:30",
         name: "茜さす 肥前浜宿 Akanesasu Hizenhamashuku 🏨",
         category: "酒店",
         desc: "【本日住宿】肥前濱宿古老釀酒街的奢華改建古民家町屋。重現江戶風華與現代高奢設施，感受侘寂之美。",
         stay: "一整晚",
-        tags: ["必吃", "必拍"],
-        photoTip: "漫步在夜間亮燈的百年釀酒古街上，穿著和風浴衣拍下復古優雅的日系大片！",
+        tags: [],
         navUrl: "https://www.booking.com/hotel/jp/qian-sasu-fei-qian-bang-su.zh-tw.html",
-        parking: "古民家設有住客專屬免費停車場。",
-        gas: "肥前濱宿街角 ENEOS 加油站。",
-        transitNext: "無，今晚在釀酒街沉浸入夢 💤",
-        transitTime: "不適用"
+        transitNext: "無，今晚在釀酒街沉浸入夢 💤"
       }
     ]
   },
@@ -255,12 +196,8 @@ const initialDaysData = [
         desc: "日本最美圖書館代表。木質大穹頂、絕美書架。館內結合星巴克與書香，極具美學氣息。",
         stay: "1.5 小時",
         tags: ["必吃", "必拍"],
-        photoTip: "限二樓指定平台上俯瞰拍攝巨型圓弧書海，能拍出極致震撼的文青大作！",
-        navUrl: "https://maps.google.com/?q=Takeo+City+Library",
-        parking: "圖書館附設超大型免費停車場 (百台以上車位)。",
-        gas: "最近加油站為 ENEOS 武雄昭和店。",
-        transitNext: "步行或開車前往武雄神社",
-        transitTime: "5 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Takeo+City+Library",
+        transitNext: "步行或開車前往武雄神社"
       },
       {
         id: "day3-spot2",
@@ -270,12 +207,8 @@ const initialDaysData = [
         desc: "佐賀最古老的神社。穿過後方幽靜的翠綠竹林，樹齡高達 3,000 年的巍峨大楠木神木立於其中，空靈肅穆。",
         stay: "1.5 小時",
         tags: ["必拍"],
-        photoTip: "仰拍高聳翠竹與穿透光感，在 3,000 年古木前合影，充滿神秘仙氣！",
-        navUrl: "https://maps.google.com/?q=Takeo+Shrine",
-        parking: "神社前鳥居旁有免費專屬臨停格 (約 20 台)。",
-        gas: "Esso 武雄加油站 (國道旁)。",
-        transitNext: "開車前往御船山樂園",
-        transitTime: "5 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Takeo+Shrine",
+        transitNext: "開車前往御船山樂園"
       },
       {
         id: "day3-spot3",
@@ -285,42 +218,30 @@ const initialDaysData = [
         desc: "午餐先購買蟬聯九州冠軍的「カイロ堂」極品 A5 佐賀牛便當，隨後進入怪石樂園進行野餐。",
         stay: "2 小時",
         tags: ["必吃", "必拍"],
-        photoTip: "以御船山奇岩為背景，手捧包裝精美的冠軍佐賀牛便當，拍下元氣美食大片！",
-        navUrl: "https://maps.google.com/?q=Mifuneyama+Rakuen",
-        parking: "御船山樂園正門口擁有超大無料專用停車場。",
-        gas: "Cosmo 石油 武雄南加油站。",
-        transitNext: "開車前往陶瓷重鎮有田小鎮",
-        transitTime: "25 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Mifuneyama+Rakuen",
+        transitNext: "開車前往陶瓷重鎮有田小鎮"
       },
       {
         id: "day3-spot4",
         time: "15:00",
-        name: "有田陶山神社 ─ 唯一的青花瓷鳥居 👑",
+        name: "有田陶山神社 ─ 唯一的青花瓷鳥居 🏺",
         category: "景點",
         desc: "陶瓷愛好者天堂. 鳥居、守護狛犬均由有田燒青花瓷製. 更妙的是境內有JR筑肥線火車穿過。",
         stay: "1.5 小時",
         tags: ["必拍", "必買"],
-        photoTip: "在陶瓷鳥居前，捕捉筑肥線火車緩穿過平交道的那一瞬間，畫面極具日本風情！",
-        navUrl: "https://maps.google.com/?q=Sueyama+Shrine+Arita",
-        parking: "平交道前有神社專用無料停車場 (斜坡駕駛請慢行)。",
-        gas: "JA 有田自營加油站 (離神社 4 分鐘)。",
-        transitNext: "開車前往伊萬里包棟別墅",
-        transitTime: "20 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Sueyama+Shrine+Arita",
+        transitNext: "開車前往伊萬里包棟別墅"
       },
       {
         id: "day3-spot5",
         time: "17:00",
         name: "Rakuten STAY HOUSE × WILL STYLE 佐賀伊万里 🏨",
         category: "酒店",
-        desc: "【本日住宿】高人氣樂天包棟設計別墅。擁有兩間挑高臥室、極舒適大客廳與設備齊全的中島廚房，配備大投影幕。",
+        desc: "【本日住宿】高人氣樂天包棟設計別墅。擁有兩間挑高臥室、極舒適大客廳與設備齊全裝備，配備大投影幕。",
         stay: "一整晚",
-        tags: ["必拍"],
-        photoTip: "挑高起居室與美式中島，適合和家人隊友一同烹飪並拍下溫馨的度假合照！",
+        tags: [],
         navUrl: "https://www.booking.com/hotel/jp/rakuten-stay-house-x-will-style-saga-imari-vacation-stay-59208v.zh-tw.html",
-        parking: "別墅前院提供住客專屬免費停車格 2 格。",
-        gas: "JA-SS 伊萬里加油站 (車程 3 分鐘)。",
-        transitNext: "無，今晚在伊萬里奢華 Villa 舒適休憩 🌙",
-        transitTime: "不適用"
+        transitNext: "無，今晚在伊萬里奢華 Villa 舒適休憩 🌙"
       }
     ]
   },
@@ -328,7 +249,7 @@ const initialDaysData = [
     day: 4,
     date: "2026/06/27 (六)",
     title: "陶藝秘境・風鈴輕響的防守",
-    area: "ijari ＆ 唐津",
+    area: "伊萬里 ＆ 唐津",
     outfit: "山區午後易起風，建議穿著薄長裙或棉麻服飾，並備妥雨具。",
     rainChance: "45%",
     temp: "21°C - 25°C",
@@ -341,42 +262,41 @@ const initialDaysData = [
         desc: "隱於群山中的秘窯之鄉。曾燒製獻幕府將軍的名瓷。六月風鈴祭，數百個白瓷青花風鈴發出清脆聲響。",
         stay: "3 小時",
         tags: ["必拍", "必買"],
-        photoTip: "在老煙囪石板路旁，拍下逆光中半透明、風鈴隨風起舞的夏日畫面，極具和風美！",
-        navUrl: "https://maps.google.com/?q=Okawachiyama+Imari",
-        parking: "入口設有大型有料觀光停車場 (300~500 日圓/防)。",
-        gas: "離園 5 分鐘車程有 ENEOS 加油站。",
-        transitNext: "自駕前往伊萬里町家民居洋食餐館",
-        transitTime: "15 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Okawachiyama+Imari",
+        transitNext: "自駕前往伊萬里夢Misaki公園"
       },
       {
         id: "day4-spot2",
         time: "13:00",
-        name: "大人の隠れ家餐廳 モンブーシェ伊万里 🍽",
-        category: "食物",
-        desc: "町家古民宅創意法式餐廳。主廚精選當季時蔬與最高等級伊萬里牛，創作出精緻美味套餐。",
-        stay: "2 小時",
-        tags: ["必吃"],
-        photoTip: "餐廳大梁木質斑駁古樸，與精緻伊萬里牛排擺盤對比，極具視覺美感！",
-        navUrl: "https://maps.google.com/?q=Mon-Boucher+Imari",
-        parking: "餐廳後方附有 6 輛賓客免費臨停位。",
-        gas: "出發往唐津前可於出光石油加油站加滿。",
-        transitNext: "自駕穿過佐賀山路開往唐津邸別館",
-        transitTime: "40 分鐘"
+        name: "伊萬里夢Misaki公園 (Imari Yume Misaki Park) 🌳",
+        category: "景點",
+        desc: "坐落於伊萬里灣旁的廣闊海濱公園。擁有大片翠綠草坪、多功能遊樂設施與美麗的海灣風光，是自駕途中的絕佳休憩點。",
+        stay: "1.5 小時",
+        tags: ["必拍"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Imari+Yume+Misaki+Park",
+        transitNext: "開車沿著玄海海岸線前往竹ノ島"
       },
       {
         id: "day4-spot3",
-        time: "16:00",
+        time: "15:00",
+        name: "玄海国定公園 竹ノ島 (Takenoshima) 🌊",
+        category: "景點",
+        desc: "漫步於玄海國定公園的竹之島地區，欣賞壯麗的奇岩異石玄武岩海岸線與清刻見底的海水，遠眺外海群島，感受大自然的鬼斧神工。",
+        stay: "1.5 小時",
+        tags: ["必拍"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Takenoshima+Karatsu",
+        transitNext: "自駕前往唐津日式別館 check-in"
+      },
+      {
+        id: "day4-spot4",
+        time: "17:00",
         name: "AKARIYA別館 ~横山邸~ 🏨",
         category: "酒店",
         desc: "【本日住宿】極富昭和復古氛圍的唐津日式別館別邸。擁有清雅私人和式庭園與榻榻米，享受日式古典生活。",
         stay: "一整晚",
-        tags: ["必拍"],
-        photoTip: "晨光灑落在榻榻米和日式拉門上，捧著熱茶合影，侘寂與清幽感拉滿！",
+        tags: [],
         navUrl: "https://www.booking.com/hotel/jp/akariyabie-guan-heng-shan-di.zh-tw.html",
-        parking: "別館附設免費旅客專用停車空地。",
-        gas: "唐津市區 ENEOS 加油站。",
-        transitNext: "無，今晚在極靜的榻榻米房舒適入眠 💤",
-        transitTime: "not applicable"
+        transitNext: "not applicable"
       }
     ]
   },
@@ -392,62 +312,57 @@ const initialDaysData = [
       {
         id: "day5-spot1",
         time: "09:30",
-        name: "唐津城（別名：舞鶴城）🏯",
+        name: "波戸岬 ─ 戀人聖地 ＆ 白色海底展望塔 🤍",
         category: "景點",
-        desc: "聳立在唐津灣畔的臨海城堡。其兩翼延伸的姿態如同仙鶴展翅。天守閣可俯看虹之松原與海灣全景。",
-        stay: "2 小時",
+        desc: "開車前往九州最西北端。設有雪白的心形紀念碑。步行進入伸入海底 7 公尺的白色海底展望塔，透過厚玻璃觀看真鯛魚在野生海水中成群悠游。",
+        stay: "1.5 小時",
         tags: ["必拍"],
-        photoTip: "將碧海藍天與五公里長半月形的翠綠虹之松原海岸線一同收納入鏡，氣勢宏偉！",
-        navUrl: "https://maps.google.com/?q=Karatsu+Castle",
-        parking: "城下附屬大型市營有料停車場 (400 日圓/2小時)。",
-        gas: "附近有 ENEOS 唐津東加油站。",
-        transitNext: "自駕經呼子大橋越過海灣前往呼子港",
-        transitTime: "30 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Cape+Hado+Karatsu",
+        transitNext: "開車往東邊前往呼子港"
       },
       {
         id: "day5-spot2",
-        time: "12:00",
-        name: "玄海いか舟処 海舟 ─ 呼子名物活烏賊姿造 🦑",
+        time: "11:30",
+        name: "呼子港 ─ 享用現撈活烏賊姿造 🦑",
         category: "食物",
-        desc: "現撈現切的活烏賊刺身名店。上桌時烏賊身體幾近透明，咬下時口感甘甜，最後可將觸手酥炸成天婦羅！",
-        stay: "1.5 小時",
+        desc: "抵達呼子港。在著名老店品嚐現撈現切的活烏賊刺身名店（如「海舟」或「河太郎」）。上桌時烏賊身體幾近透明，咬下時口感甘甜清脆，最後可將觸手酥炸成天婦羅！",
+        stay: "2 小時",
         tags: ["必吃", "必拍"],
-        photoTip: "當一盤身體幾近全透明、晶營發亮且觸手仍在微微動的活烏賊姿造端上桌時，快快錄影抓拍！",
-        navUrl: "https://maps.google.com/?q=Genkai+Ika+Funa-dokoro+Kaishu",
-        parking: "餐廳前院提供多台賓客免費專用停車位。",
-        gas: "JA 呼子加油站 (開車 4 分鐘)。",
-        transitNext: "開車前往戀人聖地波戶岬",
-        transitTime: "15 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Yobuko+Port",
+        transitNext: "自駕沿唐津灣返回唐津城"
       },
       {
         id: "day5-spot3",
         time: "14:00",
-        name: "波戸岬 ─ 戀人聖地 ＆ 白色海底展望塔 🤍",
+        name: "唐津城（別名：舞鶴城）🏯",
         category: "景點",
-        desc: "九州最端，設有雪白的心形紀念碑。可步行進入深入海底 7 公尺的海底展望塔觀賞海洋魚類。",
+        desc: "聳立在唐津灣畔的臨海城堡。其兩翼延伸的姿態如同仙鶴展翅。登上天守閣，可俯看虹之松原與海灣全景。",
         stay: "1.5 小時",
-        tags: ["必吃", "必拍"],
-        photoTip: "情侶站在草地、海風與巨大白色心形地標前合影！旁邊的烤海螺大排檔亦是打卡必拍特色！",
-        navUrl: "https://maps.google.com/?q=Cape+Hado+Karatsu",
-        parking: "岬角入口附設大型免費觀光停車場。",
-        gas: "國道旁有 Mobil 鎮西加油站。",
-        transitNext: "自駕跨越縣界，沿海濱公路開往糸島別墅",
-        transitTime: "60 分鐘"
+        tags: ["必拍"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Karatsu+Castle",
+        transitNext: "自駕前往虹之松原與鏡山觀景台"
       },
       {
         id: "day5-spot4",
-        time: "17:00",
+        time: "16:00",
+        name: "虹之松原 ＆ 鏡山觀景台 🌲⛰️",
+        category: "景點",
+        desc: "開車穿過連綿 5 公里的翠綠松林密道「虹之松原」海岸線，隨後盤旋開上鏡山觀景台，從絕頂高台上居高臨下，將半月形松林與蔚藍唐津灣海岸盡收眼底。",
+        stay: "1.5 小時",
+        tags: ["必拍"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Kagamiyama+Observatory",
+        transitNext: "自駕跨越縣界前往糸島海畔別墅"
+      },
+      {
+        id: "day5-spot5",
+        time: "18:00",
         name: "Rakuten STAY HOUSE x WILL STYLE Itoshima 101 🏡",
         category: "酒店",
-        desc: "【本日住宿】座落於絲島無敵海畔的旗艦奢害獨棟別墅別墅。高科技投影幕、中島廚房、私人戶外大露台。可享受海風BBQ度過溫馨度假夜！",
+        desc: "【本日住宿】座落於糸島無敵海畔的旗艦奢害獨棟別墅別墅。高科技投影幕、中島廚房、私人戶外大露台。可享受海風BBQ度過溫馨度假夜！",
         stay: "一整晚",
-        tags: ["必拍"],
-        photoTip: "挑高奢華的起居室與美式中島，可以全家人捧著香檳與編排好一桌海鮮，拍下最溫馨的旅行聚餐照！",
+        tags: [],
         navUrl: "https://www.booking.com/hotel/jp/rakuten-stay-house-itoshima-vacation-stay-45356.zh-tw.html",
-        parking: "別墅門前備有免費顧客專屬停車位 2 格。",
-        gas: "開車 5 分鐘處有出光志摩加油站。",
-        transitNext: "無，今晚在絲島豪華別墅烤肉夜談 🍷",
-        transitTime: "不適用"
+        transitNext: "無，今晚在絲島豪華別墅烤肉夜談 🍷"
       }
     ]
   },
@@ -468,42 +383,41 @@ const initialDaysData = [
         desc: "突出於沙灘岩石上的小巧孤島神社。僅有一條狹長木平橋與陸地相連，神社氣氛靜謐。供奉結緣之神。",
         stay: "1.5 小時",
         tags: ["必拍"],
-        photoTip: "人站在細窄木橋中央，朝海天合一的背景走去，拍張導航、空靈與治癒感強烈的背影照！",
-        navUrl: "https://maps.google.com/?q=Hakoshima+Shrine",
-        parking: "國道旁有神社專屬免費碎石空地 (約可停 8 台).",
-        gas: "最近加油站為 ENEOS 糸島加布里店。",
-        transitNext: "自駕前往二見浦夫婦岩沙灘",
-        transitTime: "15 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Hakoshima+Shrine",
+        transitNext: "自駕前往二見浦夫婦岩沙灘"
       },
       {
         id: "day6-spot2",
         time: "11:00",
         name: "櫻井二見浦 夫婦岩 ＆ 白色海上鳥居 🌊",
         category: "景點",
-        desc: "絲島著名代表絕景。純白海上鳥居矗立於沙灘，遠處則是連著神聖注連繩的夫婦岩。",
+        desc: "糸島最著名名風景。純白海上鳥居矗立於沙灘，遠處則是連著神聖注連繩的夫婦岩。",
         stay: "1.5 小時",
         tags: ["必拍"],
-        photoTip: "將雪白海上鳥居正中央與海面上微縮的雙子岩連成一線，形成幾何完美的對稱美照！",
-        navUrl: "https://maps.google.com/?q=Sakurai+Futamigaura+Itoshima",
-        parking: "夫婦岩前設有料公共停車場 (前 1 小時 300 日圓，隨後累加。)",
-        gas: "Idemitsu 出光志摩自營加油站。",
-        transitNext: "自駕開回博多市區 Budget 祇園店歸還愛車，並步行至博多站前飯店 check-in",
-        transitTime: "40 分鐘"
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Sakurai+Futamigaura+Itoshima",
+        transitNext: "開車至鄰近 of 椰子樹鞦韆公園"
+      },
+      {
+        id: "day6-spot3",
+        time: "13:00",
+        name: "椰子樹鞦韆海灘（ヤシの木ブランコ）🌴",
+        category: "活動",
+        desc: "沙灘上兩棵斜斜生長的巨型椰子樹所製成的鞦韆. 迎風高高盪漾，盡情享受海風與度假氛圍。",
+        stay: "1.5 小時",
+        tags: ["必吃", "必拍"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Yashinoki+Swing+Itoshima",
+        transitNext: "自駕開回博多市區 Budget 祇園店歸還愛車，並步行至博多站前飯店 check-in"
       },
       {
         id: "day6-spot4",
         time: "18:00",
         name: "まほら (Mahora Fukuoka) 🏨",
         category: "酒店",
-        desc: "【本日住宿】自駕行完美落幕、平安歸還租車後入住的福岡設計型公寓飯店。空間規劃前衛新穎且寧靜，距離博多車站極近。是您在回台前整理大箱小箱戰利品、採購藥妝的完美最後基地！",
+        desc: "【本日住宿】自駕行完美落幕、平安歸還租車後入住的福岡設計型公寓飯店。空間規劃前衛新穎且靜謐，距離博多車站極近。是您在回台前整理大箱小箱戰利品、採購藥妝的完美最後基地！",
         stay: "一整晚",
         tags: ["必買"],
-        photoTip: "房間內充滿北歐與日系和風交錯的輕工業美學，在此與堆積如山的伴手禮來張「自駕大豐收大滿貫」合影吧！",
         navUrl: "https://www.booking.com/hotel/jp/mahora-fu-gang-shi.zh-tw.html",
-        parking: "公寓周圍有多處收費臨停過夜有料停車場。",
-        gas: "ENEOS 八重洲加油站 (還車店附近)。",
-        transitNext: "無，今晚在福岡繁華街盡情採購、裝箱 🛍",
-        transitTime: "不適用"
+        transitNext: "無，今晚在福岡繁華街盡情採購、裝箱 🛍"
       }
     ]
   },
@@ -517,34 +431,15 @@ const initialDaysData = [
     temp: "23°C - 27°C",
     spots: [
       {
-        id: "day7-spot1",
-        time: "08:30",
-        name: "博多車站伴手禮最後衝刺",
-        category: "購物",
-        desc: "利用最後晨間時間在博多車站「Ming名店街」購買退稅土產伴手禮，如「福砂屋」蜂蜜蛋糕與明太子（滿 5,500 免稅）。",
-        stay: "1.5 小時",
-        tags: ["必買"],
-        photoTip: "車站大廳亮堂，手提一袋袋土產紙袋與大廳合影拍張戰利品大合照，為這趟購物行畫下逗點！",
-        navUrl: "https://maps.google.com/?q=Ming+Hakata+Station",
-        parking: "不適用自駕 (已還車). 建議直接步行。",
-        gas: "不適用。",
-        transitNext: "搭乘機場公車 or 地下鐵至福岡機場國際線航廈",
-        transitTime: "15 分鐘"
-      },
-      {
         id: "day7-spot2",
-        time: "11:00",
+        time: "09:30",
         name: "福岡機場 (FUK) 搭機 CI111 ＆ 回程台灣 ✈",
         category: "交通",
         desc: "前往華航櫃檯辦理登機。通關後，在免稅店進行機場伴手禮補貨與限定商品採購，隨後起飛返台。",
         stay: "2 小時",
-        tags: ["必吃", "必拍"],
-        photoTip: "在裝機廊道 or 候機室玻璃前拍張航機與福岡機場跑道的背景合影，為這趟 7 天自駕旅畫下完美句點！",
-        navUrl: "https://maps.google.com/?q=Fukuoka+Airport+International+Terminal",
-        parking: "機場大廈停車收費高，今日不適用自駕。",
-        gas: "不適用。",
-        transitNext: "平安飛抵台灣桃園國際機場",
-        transitTime: "2.5 小時"
+        tags: ["必買"],
+        navUrl: "https://www.google.com/maps/dir/?api=1&destination=Fukuoka+Airport+International+Terminal",
+        transitNext: "平安飛抵台灣桃園國際機場"
       }
     ]
   }
@@ -558,16 +453,9 @@ export default function App() {
   const [activeDay, setActiveDay] = useState(1);
   const [tipsCollapsed, setTipsCollapsed] = useState(false);
   const [isPackingEditMode, setIsPackingEditMode] = useState(false);
-  const [chatbotOpen, setChatbotOpen] = useState(false);
-  
-  const [chatMessages, setChatMessages] = useState([
-    {
-      sender: 'bot',
-      text: 'こんにちは！我是您的和風自駕小秘書 櫻子 ✨\n\n我已經載入您指定的「真實住宿明細與 Booking 憑證連結」囉！包括超棒的「茜さす 肥前浜宿」與「樂天包棟 Villa」！\n\n我可以協助您：\n1. 📸 直接點選左下角「相機圖示」上傳發票收據，我會幫您自動解析辨識記帳！\n2. 💬 用語音對話或打字記帳（例：「記帳 買有田燒花了 5500 日圓」），我會立刻在背景幫您歸類同步！\n3. 🚗 提供自駕路線指引、梅雨天氣防雨穿搭及景點好拍視角喔！🌸'
-    }
-  ]);
-  const [chatInput, setChatInput] = useState('');
-  const [chatLoading, setChatLoading] = useState(false);
+
+  // 景點專屬消費輸入狀態：格式為 { [spotId]: { item: '拉麵', category: '食物', amount: '1200' } }
+  const [spotExpenseInputs, setSpotExpenseInputs] = useState({});
 
   const [itinerary, setItinerary] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -577,100 +465,86 @@ export default function App() {
     return initialDaysData;
   });
 
-  const [apiKey, setApiKey] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('kyushu_travel_gemini_api_key') || '';
-    }
-    return '';
-  });
-  const [apiKeyInput, setApiKeyInput] = useState(apiKey);
-
   const [expenses, setExpenses] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('kyushu_expenses_v2');
       if (saved) return JSON.parse(saved);
     }
+    // 預設將實體訂房費用與對應行程中的「酒店景點」進行 spotId 連結綁定，展現高度無縫整合
+    // D2 酒店為 day2-spot6，D4 酒店為 day4-spot4，D5 酒店為 day5-spot5
     return [
-      { id: 'exp-stay1', day: 1, date: '2026/06/24', category: '住宿', item: 'スコーレ第２天神 (D1住宿費)', amount: 5041 },
-      { id: 'exp-stay2', day: 2, date: '2026/06/25', category: '住宿', item: '茜さす 肥前浜宿 (D2住宿費)', amount: 22467 },
-      { id: 'exp-stay3', day: 3, date: '2026/06/26', category: '住宿', item: 'Rakuten STAY佐賀伊万里 (D3住宿費)', amount: 8763 },
-      { id: 'exp-stay4', day: 4, date: '2026/06/27', category: '住宿', item: 'AKARIYA別館 ~横山邸~ (D4住宿費)', amount: 9015 },
-      { id: 'exp-stay5', day: 5, date: '2026/06/28', category: '住宿', item: '絲島 Rakuten STAY 101 (D5住宿費)', amount: 6200 },
-      { id: 'exp-stay6', day: 6, date: '2026/06/29', category: '住宿', item: 'まほら (D6住宿費)', amount: 5400 }
+      { id: 'exp-stay1', day: 1, date: '2026/06/24', category: '住宿', item: 'スコーレ第２天神 (D1住宿費)', amount: 5041, spotId: 'day1-spot5', spotName: 'スコーレ第２天神 (Scole No.2 Tenjin) 🏨' },
+      { id: 'exp-stay2', day: 2, date: '2026/06/25', category: '住宿', item: '茜さす 肥前浜宿 (D2住宿費)', amount: 22467, spotId: 'day2-spot6', spotName: '茜さす 肥前浜宿 Akanesasu Hizenhamashuku 🏨' },
+      { id: 'exp-stay3', day: 3, date: '2026/06/26', category: '住宿', item: 'Rakuten STAY佐賀伊万里 (D3住宿費)', amount: 8763, spotId: 'day3-spot5', spotName: 'Rakuten STAY HOUSE × WILL STYLE 佐賀伊万里 🏨' },
+      { id: 'exp-stay4', day: 4, date: '2026/06/27', category: '住宿', item: 'AKARIYA別館 ~横山邸~ (D4住宿費)', amount: 9015, spotId: 'day4-spot4', spotName: 'AKARIYA別館 ~横山邸~ 🏨' },
+      { id: 'exp-stay5', day: 5, date: '2026/06/28', category: '住宿', item: '絲島 Rakuten STAY 101 (D5住宿費)', amount: 6200, spotId: 'day5-spot5', spotName: 'Rakuten STAY HOUSE x WILL STYLE Itoshima 101 🏡' },
+      { id: 'exp-stay6', day: 6, date: '2026/06/29', category: '住宿', item: 'まほら (D6住宿費)', amount: 5400, spotId: 'day6-spot4', spotName: 'まほら (Mahora Fukuoka) 🏨' }
     ];
   });
-
-  const [dailyAiAnalysis, setDailyAiAnalysis] = useState({});
-  const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
-  const [aiAnalysisError, setDailyAiAnalysisError] = useState("");
 
   const [packingList, setPackingList] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('kyushu_packing_v2');
       if (saved) return JSON.parse(saved);
     }
+    // 套用使用者所提供的真實行李打包清單與結構，全數調整為 checked: false 確保不用示範打勾
     return {
       personal: [
-        { id: 'p1', text: '護照正本（有效期限內）', checked: true, qty: 1 },
-        { id: 'p2', text: '台灣駕照正本 + 日文譯本 + 國際駕照', checked: true, qty: 1 },
-        { id: 'p3', text: '日圓現金 (已兌換)', checked: true, qty: 1 },
-        { id: 'p4', text: '信用卡 (國外高刷卡回饋與機場服務)', checked: true, qty: 2 },
-        { id: 'p5', text: 'eSIM 條碼列印 / 實體日本上網卡', checked: false, qty: 1 },
-      ],
-      cabin: [
-        { id: 'c1', text: '行動電源 (登機不可託運)', checked: true, qty: 1 },
-        { id: 'c2', text: '手機與各類 3C 充電線組', checked: false, qty: 1 },
-        { id: 'c3', text: '保溫空瓶 (入關後裝溫水)', checked: false, qty: 1 },
-        { id: 'c4', text: '隨身藥品 (護眼、難關應急常備藥)', checked: true, qty: 1 },
+        { id: 'p1', text: '個人身分證件 (護照、身分證、簽證、國際駕照)', checked: false, qty: 1 },
+        { id: 'p2', text: '登機證 (紙本機票或電子機票)', checked: false, qty: 1 },
+        { id: 'p3', text: '現金 (當地貨幣、少量台幣、VISA功能提款卡)', checked: false, qty: 1 },
+        { id: 'p4', text: '信用卡 (國外刷卡回饋高或有附加機場服務、國外服務的信用卡)', checked: false, qty: 1 },
+        { id: 'p5', text: '手機 / 充電線', checked: false, qty: 1 },
+        { id: 'p6', text: '交通卡', checked: false, qty: 1 },
+        { id: 'p7', text: '網卡 (上網卡、事先列印的eSIM QRcode)', checked: false, qty: 1 },
+        { id: 'p8', text: '住宿、交通預約證明 (可以存在手機內，或列印出來備用以防萬一)', checked: false, qty: 1 },
+        { id: 'p9', text: '空的水瓶 (可依照自己習慣改成好攜帶的保溫瓶、環保杯等)', checked: false, qty: 1 },
+        { id: 'p10', text: '好寫的原子筆 (建議為快乾不易掉色、暈染的油性原子筆)', checked: false, qty: 1 },
+        { id: 'p11', text: '清潔用品 (衛生紙 / 女性衛生用品 / 手帕或小毛巾)', checked: false, qty: 1 },
+        { id: 'p12', text: '護手霜、潤唇膏 (機艙很乾燥，隨時可以補充讓搭飛機過程中舒適)', checked: false, qty: 1 },
+        { id: 'p13', text: '鑰匙 (家裡的、汽機車的)', checked: false, qty: 1 },
+        { id: 'p14', text: '小型收納袋 (可以存放SIM卡、當地收據、各類預約證明)', checked: false, qty: 1 },
+        { id: 'p15', text: '電子用品 (筆記型電腦、手機跟手錶充電線、充電頭*2)', checked: false, qty: 1 }
       ],
       checked: [
-        { id: 't1', text: '換洗衣物、夏日防曬外套與舒適走鞋', checked: false, qty: 7 },
-        { id: 't2', text: '折疊雨傘 (六月日本梅雨季)', checked: true, qty: 1 },
-        { id: 't3', text: '旅行保養組與防曬用品', checked: false, qty: 1 },
-        { id: 't4', text: '備用折疊旅行袋 (裝戰利品)', checked: false, qty: 1 },
-      ],
-      shopping: [
-        { id: 's1', text: '有田燒精緻青花瓷盤、風鈴', checked: false, qty: 1 },
-        { id: 's2', text: '博多通饅頭伴手禮', checked: false, qty: 1 },
-        { id: 's3', text: '呼子港真空烏賊脆餅', checked: false, qty: 1 },
-        { id: 's4', text: '日本藥妝、美妝防曬、止痛藥', checked: false, qty: 1 },
+        { id: 't1', text: '兩個大行李箱 (備用收納袋)', checked: false, qty: 1 },
+        { id: 't2', text: '衣物類 (三套衣物_Curt)', checked: false, qty: 1 },
+        { id: 't3', text: '衣物類 (三套衣物_Ting)', checked: false, qty: 1 },
+        { id: 't4', text: '衣物類 (三套衣物_Elio)', checked: false, qty: 1 },
+        { id: 't5', text: '衣物類 (三套衣物_Elia)', checked: false, qty: 1 },
+        { id: 't6', text: '配件類 (飾品、太陽眼鏡、帽子)', checked: false, qty: 1 },
+        { id: 't7', text: '日用品 (摺疊傘)', checked: false, qty: 1 },
+        { id: 't8', text: '藥品 (腸胃藥、感冒藥、暈車藥、蚊蟲藥、攜帶型急救包、個人常備藥)', checked: false, qty: 1 },
+        { id: 't9', text: '保養化妝品 (化妝水、潤膚用品、防曬乳、粉底、口紅等)', checked: false, qty: 1 },
+        { id: 't10', text: '盥洗用品 (卸妝乳、洗面乳、牙膏、牙刷)', checked: false, qty: 1 },
+        { id: 't11', text: '收納用品 (可收納衣服的購物袋)', checked: false, qty: 1 },
+        { id: 't12', text: '文件 (影本護照)', checked: false, qty: 1 }
       ]
     };
   });
 
-  const [journals, setJournals] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('kyushu_journals_v2');
-      if (saved) return JSON.parse(saved);
-    }
-    return {
-      'day1-spot3': { note: '福岡市動物園的狐檬太有活力了！今天天氣好舒服，野餐很成功。', photo: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=600&q=80' },
-      'day2-spot4': { note: '夕陽下太良町的海上鳥居真的很夢幻...剛好等到滿潮，海水淹到第二個鳥居！超美。', photo: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80' },
-      'day3-spot1': { note: '武雄市圖書館裡面的星巴克咖啡好香，建築物內部宏偉，不愧是日本最美圖書館之一。', photo: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=600&q=80' },
-      'day5-spot2': { note: '呼子港的活烏賊刺身精緻驚豔！身體是半透明的，吃起來無比甜脆！', photo: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=600&q=80' }
-    };
-  });
-
   // --------------------------------------------------------
-  // ✨ 行程編輯與新增彈框所屬狀態宣告 (修復 spotModalOpen 等未定義錯誤)
+  // ✨ 行程編輯與新增彈框所屬狀態宣告
   // --------------------------------------------------------
   const [spotModalOpen, setSpotModalOpen] = useState(false);
   const [modalTargetDay, setModalTargetDay] = useState(1);
   const [modalInsertIndex, setModalInsertIndex] = useState(0);
   const [editingSpotId, setEditingSpotId] = useState(null);
+  
+  // 停留時間的小時與分鐘狀態 (預設值 1 小時 0 分鐘)
+  const [stayHours, setStayHours] = useState(1);
+  const [stayMinutes, setStayMinutes] = useState(0);
+
   const [spotForm, setSpotForm] = useState({
     time: '10:00',
     name: '',
     category: '景點',
     desc: '',
     stay: '1 小時',
-    tags: ['必吃'],
+    tags: [],
     photoTip: '',
     navUrl: 'https://maps.google.com/?q=',
-    parking: '預設免費停車場',
-    gas: '最近自駕加油站',
-    transitNext: '自駕開往下一站',
-    transitTime: '15 分鐘'
+    transitNext: ''
   });
 
   // 手動記帳表單狀態
@@ -679,60 +553,38 @@ export default function App() {
   const [expFormItem, setExpFormItem] = useState('');
   const [expFormAmount, setExpFormAmount] = useState('');
 
-  // --------------------------------------------------------
-  // 2. 參照宣告 (Refs)
-  // --------------------------------------------------------
-  const chatBottomRef = useRef(null);
+  const [newItemText, setNewItemText] = useState('');
+  const [newItemCategory, setNewItemCategory] = useState('personal');
+
+  // 客製化防阻擋提示及刪除確認彈窗 (完美避開 iframe 內的阻擋限制)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState({ dayNum: null, spotId: null, spotName: '' });
+  const [alertMessage, setAlertMessage] = useState('');
 
   // --------------------------------------------------------
-  // 3. 副作用處理 (useEffect)
+  // 3. 副作用處理 (useEffect) ── 全功能 LocalStorage 持久同步
   // --------------------------------------------------------
-  // (1) 載入字型
   useEffect(() => {
     injectFont();
   }, []);
 
-  // (2) 每日行程資料寫入 LocalStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('kyushu_itinerary_v2', JSON.stringify(itinerary));
     }
   }, [itinerary]);
 
-  // (3) 儲存 API Key 變更 (響應式單一數據源)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('kyushu_travel_gemini_api_key', apiKey);
-    }
-  }, [apiKey]);
-
-  // (4) 消費帳本寫入 LocalStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('kyushu_expenses_v2', JSON.stringify(expenses));
     }
   }, [expenses]);
 
-  // (5) 打包清單寫入 LocalStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('kyushu_packing_v2', JSON.stringify(packingList));
     }
   }, [packingList]);
-
-  // (6) 旅行隨筆與旅記寫入 LocalStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('kyushu_journals_v2', JSON.stringify(journals));
-    }
-  }, [journals]);
-
-  // (7) 聊天對話自動捲動
-  useEffect(() => {
-    if (chatbotOpen && chatBottomRef.current) {
-      chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [chatbotOpen, chatMessages, chatLoading]);
 
   // --------------------------------------------------------
   // 4. 衍生計算變數 (Derived Variables)
@@ -750,96 +602,37 @@ export default function App() {
   const currentDayData = itinerary.find(d => d.day === activeDay);
 
   // --------------------------------------------------------
-  // 5. 互動處理函式 (Handlers)
+  // 5. 實用輔助工具函式
   // --------------------------------------------------------
-  // 記帳控制函數
-  const handleAddExpenseManual = (e) => {
-    e.preventDefault();
-    if (!expFormItem.trim() || !expFormAmount) return;
-    
-    const dateMapping = {
-      '2026/06/24': 1, '2026/06/25': 2, '2026/06/26': 3,
-      '2026/06/27': 4, '2026/06/28': 5, '2026/06/29': 6, '2026/06/30': 7
-    };
-
-    const newExp = {
-      id: 'exp-' + Date.now(),
-      day: dateMapping[expFormDate] || 1,
-      date: expFormDate,
-      category: expFormCategory,
-      item: expFormItem,
-      amount: parseInt(expFormAmount)
-    };
-
-    setExpenses(prev => [...prev, newExp]);
-    setExpFormItem('');
-    setExpFormAmount('');
+  // 估算時間加 30 分鐘工具，協助實現在其後指示插入行程加 30 分鐘 the 預估時間
+  const addMinutesToTime = (timeStr, minsToAdd) => {
+    if (!timeStr || !timeStr.includes(':')) return '08:30';
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return '08:30';
+    let newMins = minutes + minsToAdd;
+    let newHours = hours + Math.floor(newMins / 60);
+    newMins = newMins % 60;
+    newHours = newHours % 24;
+    return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`;
   };
 
-  const handleDeleteExpense = (id) => {
-    setExpenses(prev => prev.filter(item => item.id !== id));
+  // 解析停留時間字串轉為選單狀態
+  const parseStayTime = (stayStr) => {
+    let h = 1;
+    let m = 0;
+    if (stayStr) {
+      const hourMatch = stayStr.match(/(\d+)\s*小時/);
+      const minMatch = stayStr.match(/(\d+)\s*分鐘/);
+      if (hourMatch) h = parseInt(hourMatch[1]);
+      else if (stayStr.includes("分鐘") && !stayStr.includes("小時")) h = 0;
+      if (minMatch) m = parseInt(minMatch[1]);
+    }
+    return { h, m };
   };
 
-  // 匯出 Excel (CSV) 核心邏輯
-  const handleExportToExcel = () => {
-    let csvContent = "\uFEFF";
-    csvContent += "========================================================\n";
-    csvContent += "2026 九州 (福岡・佐賀・絲島) 自駕自由行 完整旅行全紀錄總表\n";
-    csvContent += `匯出日期：2026/05/20 | 總預算：JPY ${totalBudget.toLocaleString()} | 匯率參考：0.21\n`;
-    csvContent += "========================================================\n\n";
-    csvContent += "--- 一、 財務預算執行摘要 ---\n";
-    csvContent += "財務指標項目,數值 (JPY),估算數值 (TWD),百分比\n";
-    csvContent += `總預算額度,JPY ${totalBudget.toLocaleString()},NT$ ${Math.round(totalBudget * 0.21).toLocaleString()},100%\n`;
-    csvContent += `已累計支出,JPY ${totalSpentJPY.toLocaleString()},NT$ ${totalSpentTWD.toLocaleString()},${progressPercent}%\n`;
-    csvContent += `剩餘可用預算,JPY ${(totalBudget - totalSpentJPY).toLocaleString()},NT$ ${Math.round((totalBudget - totalSpentJPY) * 0.21).toLocaleString()},${100 - progressPercent}%\n\n`;
-    csvContent += "消費大類類別,累計支出金額 (日圓 JPY),預算佔比\n";
-    Object.keys(categoryBreakdown).forEach(cat => {
-      const amt = categoryBreakdown[cat];
-      const p = Math.round((amt / totalSpentJPY) * 100);
-      csvContent += `"${cat}","JPY ${amt.toLocaleString()}","${p}%"\n`;
-    });
-    csvContent += "\n";
-    csvContent += "--- 二、 每日詳細行程計畫表 ---\n";
-    csvContent += "天數,日期,自駕地區,本日行程主題,本日降雨率,時間點,行程景點名稱,預計停留,景點類別,自駕停車場指引,最近自駕加油站,景點與交通描述,拍照好拍技巧\n";
-    itinerary.forEach(d => {
-      d.spots.forEach(s => {
-        csvContent += `"${`D${d.day}`}","${d.date}","${d.area}","${d.title}","${d.rainChance}","${s.time}","${s.name}","${s.stay}","${s.category}","${(s.parking || '').replace(/"/g, '""')}","${(s.gas || '').replace(/"/g, '""')}","${(s.desc || '').replace(/"/g, '""')}","${(s.photoTip || '').replace(/"/g, '""')}"\n`;
-      });
-    });
-    csvContent += "\n";
-    csvContent += "--- 三、 消費記帳明細流水帳 ---\n";
-    csvContent += "記帳日期,行程天數,費用大類,消費項目/飯店/餐飲名稱,支出金額 (日圓 JPY),估計折合金額 (台幣 TWD)\n";
-    expenses.forEach(item => {
-      csvContent += `"${item.date}","${`D${item.day}`}","${item.category}","${item.item.replace(/"/g, '""')}","${item.amount}","${Math.round(item.amount * 0.21)}"\n`;
-    });
-    csvContent += "\n";
-    csvContent += "--- 四, 行理準備與日本代購清單 ---\n";
-    csvContent += "清單類別,準備物品名稱,需求數量,準備與勾選狀態\n";
-    const categoryNames = {
-      personal: "💼 隨身背包 (證件貴重物品)",
-      cabin: "🛫 手提行李 (隨身攜帶)",
-      checked: "🧳 託運行李 (行李箱託運)",
-      shopping: "🛍 日本預購 ＆ 伴手禮清單"
-    };
-    Object.keys(packingList).forEach(catKey => {
-      packingList[catKey].forEach(item => {
-        csvContent += `"${categoryNames[catKey]}","${item.text.replace(/"/g, '""')}","${item.qty}","${item.checked ? '已備妥' : '尚未準備'}"\n`;
-      });
-    });
-    
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "2026_九州自由行_智慧自駕全方位明細表.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const [newItemText, setNewItemText] = useState('');
-  const [newItemCategory, setNewItemCategory] = useState('personal');
-
+  // --------------------------------------------------------
+  // 6. 互動處理函式 (Handlers)
+  // --------------------------------------------------------
   const handleAddItem = (e) => {
     e.preventDefault();
     if (!newItemText.trim()) return;
@@ -890,303 +683,238 @@ export default function App() {
     }));
   };
 
-  // 在前端直接壓縮隨行旅記上傳的相片，除了防止 5MB 的 localStorage 快取限制爆滿之外，還能提升運作效能！
-  const handlePhotoUpload = (spotId, e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const originalBase64 = reader.result;
-        try {
-          // 壓縮旅記相片為寬度最大 800px，品質 0.7，大幅減輕快取負擔！
-          const compressedBase64 = await compressImage(originalBase64, 800, 0.7);
-          setJournals(prev => ({
-            ...prev,
-            [spotId]: {
-              ...prev[spotId],
-              photo: compressedBase64
-            }
-          }));
-        } catch (err) {
-          // 若壓縮失敗則使用原圖 base64 作為備援保險
-          setJournals(prev => ({
-            ...prev,
-            [spotId]: {
-              ...prev[spotId],
-              photo: originalBase64
-            }
-          }));
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+  // 在此前插入新行程：預設時間強制設定為 08:00
+  const openSpotModalForAdd = (dayNum, insertIndex, defaultTime = '08:00') => {
+    setModalTargetDay(dayNum);
+    setModalInsertIndex(insertIndex);
+    setEditingSpotId(null);
+    setStayHours(1);
+    setStayMinutes(0);
+    setSpotForm({
+      time: defaultTime,
+      name: '',
+      category: '景點',
+      desc: '',
+      stay: '1 小時',
+      tags: [],
+      photoTip: '',
+      navUrl: 'https://maps.google.com/?q=',
+      transitNext: ''
+    });
+    setSpotModalOpen(true);
   };
 
-  const handleJournalNoteChange = (spotId, noteText) => {
-    setJournals(prev => ({
+  const openSpotModalForEdit = (dayNum, spot) => {
+    setModalTargetDay(dayNum);
+    setEditingSpotId(spot.id);
+    const { h, m } = parseStayTime(spot.stay);
+    setStayHours(h);
+    setStayMinutes(m);
+    setSpotForm({
+      time: spot.time || '10:00',
+      name: spot.name || '',
+      category: spot.category || '景點',
+      desc: spot.desc || '',
+      stay: spot.stay || '1 小時',
+      tags: spot.tags || [],
+      photoTip: spot.photoTip || '',
+      navUrl: spot.navUrl || 'https://maps.google.com/?q=',
+      transitNext: spot.transitNext || ''
+    });
+    setSpotModalOpen(true);
+  };
+
+  const handleSaveSpotForm = (e) => {
+    e.preventDefault();
+    
+    // 智慧組合停留時間字串
+    let stayStr = '';
+    if (stayHours === 0 && stayMinutes === 0) {
+      stayStr = '30 分鐘'; 
+    } else {
+      stayStr = stayHours > 0 
+        ? `${stayHours} 小時${stayMinutes > 0 ? ` ${stayMinutes} 分鐘` : ''}` 
+        : `${stayMinutes} 分鐘`;
+    }
+
+    const finalForm = {
+      ...spotForm,
+      stay: stayStr
+    };
+
+    setItinerary(prev => {
+      return prev.map(d => {
+        if (d.day !== modalTargetDay) return d;
+        let newSpots = [...d.spots];
+
+        if (editingSpotId) {
+          newSpots = newSpots.map(s => s.id === editingSpotId ? { ...s, ...finalForm } : s);
+        } else {
+          const newSpot = {
+            id: 'custom-spot-' + Date.now(),
+            ...finalForm
+          };
+          newSpots.splice(modalInsertIndex, 0, newSpot);
+        }
+        return { ...d, spots: newSpots };
+      });
+    });
+    setSpotModalOpen(false);
+  };
+
+  // 自訂安全刪除確認機制 (取代受限的 window.confirm())
+  const initiateDeleteSpot = (dayNum, spotId, spotName) => {
+    setDeleteTarget({ dayNum, spotId, spotName });
+    setDeleteConfirmOpen(true);
+  };
+
+  // 刪除景點時連同消費紀錄頁面相關花費一併移除
+  const confirmDeleteSpot = () => {
+    const { dayNum, spotId } = deleteTarget;
+    // 1. 刪除景點
+    setItinerary(prev => {
+      return prev.map(d => {
+        if (d.day !== dayNum) return d;
+        return {
+          ...d,
+          spots: d.spots.filter(s => s.id !== spotId)
+        };
+      });
+    });
+    // 2. 聯動移除關聯的所有花費紀錄
+    setExpenses(prev => prev.filter(e => e.spotId !== spotId));
+
+    setDeleteConfirmOpen(false);
+    setDeleteTarget({ dayNum: null, spotId: null, spotName: '' });
+  };
+
+  // 獨立/一般消費記帳登錄
+  const handleAddExpenseManual = (e) => {
+    e.preventDefault();
+    if (!expFormItem.trim() || !expFormAmount) return;
+    
+    const dateMapping = {
+      '2026/06/24': 1, '2026/06/25': 2, '2026/06/26': 3,
+      '2026/06/27': 4, '2026/06/28': 5, '2026/06/29': 6, '2026/06/30': 7
+    };
+
+    const newExp = {
+      id: 'exp-' + Date.now(),
+      day: dateMapping[expFormDate] || 1,
+      date: expFormDate,
+      category: expFormCategory,
+      item: expFormItem,
+      amount: parseInt(expFormAmount)
+    };
+
+    setExpenses(prev => [...prev, newExp]);
+    setExpFormItem('');
+    setExpFormAmount('');
+  };
+
+  const handleDeleteExpense = (id) => {
+    setExpenses(prev => prev.filter(item => item.id !== id));
+  };
+
+  // 處理景點內嵌專屬消費輸入更動與新增機制
+  const handleSpotInputChange = (spotId, field, value) => {
+    setSpotExpenseInputs(prev => ({
       ...prev,
       [spotId]: {
-        ...prev[spotId],
-        note: noteText
+        ...(prev[spotId] || { item: '', category: '食物', amount: '' }),
+        [field]: value
       }
     }));
   };
 
-  const handleSaveApiKey = () => {
-    const trimmedKey = apiKeyInput.trim();
-    // 這邊只做單一數據源寫入，LocalStorage 儲存統一交給 useEffect 處理，避免冗餘寫入
-    setApiKey(trimmedKey);
-    setChatMessages(prev => [...prev, {
-      sender: 'bot',
-      text: '✨ 櫻子播報：Gemini 3.1 Flash-Lite API 金鑰已成功儲存並同步啟用囉！現在您可以點選下方快捷提問，或直接上傳收據拍照記帳，開啟九州智慧自駕助理捏！🌸'
-    }]);
-  };
+  const handleSpotExpenseAddLocal = (spot, dayNum, dateStr) => {
+    const input = spotExpenseInputs[spot.id] || {};
+    const itemName = input.item || '';
+    const amount = input.amount || '';
+    const category = input.category || '食物';
 
-  const handleDailyAiAnalysis = async () => {
-    if (!apiKey) {
-      setDailyAiAnalysisError("⚠️ 請先點擊頂部 Header 右側 of the AI 秘書，在上方金鑰欄位輸入並「儲存」您的 Gemini API 金鑰喔！🌸");
-      setChatbotOpen(true);
+    if (!itemName.trim() || !amount) {
+      setAlertMessage("請輸入消費項目名稱與金額！");
       return;
     }
-    setAiAnalysisLoading(true);
-    setDailyAiAnalysisError("");
-    const activeDayData = itinerary.find(d => d.day === activeDay);
-    const prompt = `
-      現在我是日本自駕旅客，今天是我的第 ${activeDay} 天行程。
-      地區：${activeDayData.area}
-      今天的主題：${activeDayData.title}
-      今天的行程包含以下景點與結尾住宿：
-      ${activeDayData.spots.map((s, idx) => `${idx + 1}. ${s.name} (${s.category}) - ${s.desc}`).join('\n')}
 
-      請為我即時智慧優化以下三個面向，並以生動可愛的日式繁體中文回答：
-      1. 🚗 【今日自駕 J-Pop 音樂推薦】：推薦 2 首適合今天自駕沿途風光聆聽的日本經典歌單 or 樂風，並給出推薦理由。
-      2. 🍜 【周邊隱藏版美食與住宿周圍宵夜】：根據今天實際安排 of the spots, 推薦一個原清單中沒有列出的在地人私房美食或宵夜！
-      3. 🛣 【開車與過路費 (ETC) 小提醒】：針對今天的自駕路線（高速公路段、收費站 or 特殊山路），提供具體的 ETC 扣款、導航過路費或停車避坑策略。
-    `;
-    const systemInstruction = `
-      你是一位精通日本九州自由行的 AI 導遊。
-      你擁有日本文化、自駕（ETC過路費、開車安全）、以及九州極深度的私房美食與住宿資料庫。
-      請使用溫柔貼心、專業且可愛的繁體中文回答。請使用 Markdown 排版並加上豐富表情符號。
-    `;
-    try {
-      const responseText = await callGeminiAPI(prompt, systemInstruction);
-      setDailyAiAnalysis(prev => ({
-        ...prev,
-        [activeDay]: responseText
-      }));
-    } catch (err) {
-      setDailyAiAnalysisError(err.message || "AI 分析出了點小狀況，請稍後再試。");
-    } finally {
-      setAiAnalysisLoading(false);
-    }
-  };
-
-  // 智慧 AI 相機/發票辨識記帳處理 (結合 compressImage 前端極速壓縮技術)
-  // 如果辨識發生錯誤或失敗，將直接回覆錯誤提示，不再自動套用模擬填入
-  const handleReceiptUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setChatLoading(true);
-    setChatbotOpen(true);
-    setChatMessages(prev => [...prev, { sender: 'user', text: '📷 [上傳了消費明細收據，正在前端極速壓縮並請求櫻子辨識中...]' }]);
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const originalBase64 = reader.result;
-      try {
-        // 在前端直接將收據壓縮為最大寬度 1024px，保留極佳 OCR 解析度的同時體積縮小 95%！
-        const compressedBase64 = await compressImage(originalBase64, 1024, 0.7);
-        
-        const prompt = `
-          請仔細辨識這張收據或消費明細圖片。請解析出以下三個欄位，並「嚴格且只以 JSON 格式」回傳：
-          {
-            "item": "辨識到的商品/消費項目名稱(繁體中文簡述)",
-            "amount": 總消費金額數字(必須是新台幣 or 日圓整數，如果是日圓請以日圓為主),
-            "category": "食物/交通/購物/活動/住宿/其他其中的一個最佳配對"
-          }
-          注意：不要回傳 any extra Markdown notation or wrapper. Just pure JSON.
-        `;
-        const systemInstruction = `你是一個極度精準的收據記帳 OCR 助理。你只會回傳標準的 JSON 物件，沒有任何多餘的解釋 or 包裹符號。`;
-        
-        const responseText = await callGeminiAPI(prompt, systemInstruction, compressedBase64, "image/jpeg");
-        let cleanJson = responseText.replace(/```json|```/g, "").trim();
-        const parsed = JSON.parse(cleanJson);
-        if (parsed.item && parsed.amount) {
-          const dateMapping = { 1: '2026/06/24', 2: '2026/06/25', 3: '2026/06/26', 4: '2026/06/27', 5: '2026/06/28', 6: '2026/06/29', 7: '2026/06/30' };
-          const newExp = {
-            id: 'exp-' + Date.now(),
-            day: activeDay,
-            date: dateMapping[activeDay] || '2026/06/24',
-            category: parsed.category || '購物',
-            item: parsed.item,
-            amount: parseInt(parsed.amount)
-          };
-          setExpenses(prev => [...prev, newExp]);
-          setChatMessages(prev => [...prev, { 
-            sender: 'bot', 
-            text: `✨ 櫻子辨識成功！已自動幫您登錄至記帳簿囉：\n\n📅 日期：D${activeDay} (${newExp.date})\n🛍 項目：${parsed.item}\n🏷 類別：${parsed.category}\n💰 金額：￥${parsed.amount.toLocaleString()} 日圓\n\n此筆費用已同步累計至您的【消費記帳】總理財分析頁中喔！太便利捏！🌸`
-          }]);
-        } else {
-          throw new Error("JSON 格式無效");
-        }
-      } catch (err) {
-        // OCR 失敗或不支援時，不進行模擬體驗，直接給予手動輸入指示提示
-        setChatMessages(prev => [...prev, { 
-          sender: 'bot', 
-          text: '文字辨識失敗，請改成手動輸入' 
-        }]);
-      } finally {
-        setChatLoading(false);
-      }
+    const newExp = {
+      id: 'exp-' + Date.now(),
+      day: dayNum,
+      date: dateStr.split(' ')[0], // 去除星期備註
+      category: category,
+      item: itemName,
+      amount: parseInt(amount),
+      spotId: spot.id,
+      spotName: spot.name
     };
-    reader.readAsDataURL(file);
+
+    setExpenses(prev => [...prev, newExp]);
+
+    // 清空當前景點輸入框
+    setSpotExpenseInputs(prev => ({
+      ...prev,
+      [spot.id]: { item: '', category: '食物', amount: '' }
+    }));
   };
 
-  const handleChatSubmit = async (e) => {
-    if (e) e.preventDefault();
-    if (!chatInput.trim() || chatLoading) return;
-    const userMessage = chatInput;
-    setChatMessages(prev => [...prev, { sender: 'user', text: userMessage }]);
-    setChatInput('');
-    setChatLoading(true);
-    if (!apiKey) {
-      setTimeout(() => {
-        setChatMessages(prev => [...prev, {
-          sender: 'bot',
-          text: '⚠️ 哎呀！櫻子現在沒有配戴「Gemini API 金鑰」而無法思考捏。\n\n請先在上方輸入欄中填入您的 API Key（以 AI 智慧驅動），並點擊「儲存/置換」按鈕。儲存後我便能立刻為您排憂解難、自動記帳囉！🌸'
-        }]);
-        setChatLoading(false);
-      }, 600);
-      return;
-    }
-    const isBookkeepingCmd = userMessage.includes('記帳') || userMessage.includes('花費') || userMessage.includes('買了') || userMessage.includes('付了') || userMessage.includes('花了');
-    let systemPrompt = `
-      Slot 1: 你是一位九州當地的「和風自駕 AI 秘書」，名字叫作「櫻子 (Sakurako)」。
-      you are currently using the newly updated Gemini 3.1 Flash-Lite model, which processes requests even faster.
-      定製行程：你主要陪伴正在進行「2026/06/24 - 06/30 福岡與佐賀 7天6夜自駕行程」的台灣旅客。
-      
-      以下是旅客目前的完整 7 天行程背景與精確入住飯店：
-      - D1: スコーレ第２天神
-      - D2: 茜さす 肥前浜宿
-      - D3: Rakuten STAY HOUSE × WILL STYLE 佐賀伊万里
-      - D4: AKARIYA別館 ~横山邸~
-      - D5: Rakuten STAY HOUSE x WILL STYLE Itoshima 101
-      - D6: まほら (Mahora)
-      - D7: 返回台灣
-
-      回答指導方針：
-      1. 使用極具禮貌、溫慢體貼的「繁體中文」回答。每句話融入「日語單字拼音/和風語助詞」。
-      2. 針對自駕ETC、六月梅雨防雨、景點拍照細節等提供深度的私房指引。
-      3. 若旅客沒有問到旅遊建議，請勿主動提供多餘的長篇大論、建議、預算規劃或多作贅述。
-    `;
-    if (isBookkeepingCmd) {
-      systemPrompt += `
-        特別任務：偵測到旅客想要進行對話手動「記帳」！
-        請在回答 of the beginning 的第一行，『嚴格以下列格式包裹記帳 JSON』，讓我們後台能直接執行記帳同步：
-        ---BOOKKEEPING_START---
-        {
-          "item": "分析出商品項目名稱",
-          "amount": 分析出的日圓整數金額,
-          "category": "食物/交通/購物/活動/住宿/其他"
-        }
-        ---BOOKKEEPING_END---
-        接著在第二行開始，請「只回覆記帳的過程跟結果即可」，絕對不要有任何後續的寒暄、多餘的旅行建議、預算提醒或主動提問。沒有提問到相關問題不用多回答。
-      `;
-    }
-    try {
-      const responseText = await callGeminiAPI(userMessage, systemPrompt);
-      if (isBookkeepingCmd && responseText.includes('---BOOKKEEPING_START---')) {
-        const jsonStr = responseText.split('---BOOKKEEPING_START---')[1].split('---BOOKKEEPING_END---')[0].trim();
-        const parsed = JSON.parse(jsonStr);
-        if (parsed.item && parsed.amount) {
-          const dateMapping = { 1: '2026/06/24', 2: '2026/06/25', 3: '2026/06/26', 4: '2026/06/27', 5: '2026/06/28', 6: '2026/06/29', 7: '2026/06/30' };
-          const newExp = {
-            id: 'exp-ai-' + Date.now(),
-            day: activeDay,
-            date: dateMapping[activeDay] || '2026/06/24',
-            category: parsed.category || '食物',
-            item: parsed.item,
-            amount: parseInt(parsed.amount)
-          };
-          setExpenses(prev => [...prev, newExp]);
-        }
-        const userFriendlyReply = responseText.split('---BOOKKEEPING_END---')[1]?.trim() || responseText;
-        setChatMessages(prev => [...prev, { sender: 'bot', text: `📝 櫻子自動記帳成功！\n💸 已登錄: [${parsed.category}] ${parsed.item} (￥${parsed.amount.toLocaleString()}日圓)\n\n${userFriendlyReply}` }]);
-      } else {
-        setChatMessages(prev => [...prev, { sender: 'bot', text: responseText }]);
-      }
-    } catch (err) {
-      if (isBookkeepingCmd) {
-        const amountMatch = userMessage.match(/\d+/);
-        const parsedAmount = amountMatch ? parseInt(amountMatch[0]) : 1500;
-        const dateMapping = { 1: '2026/06/24', 2: '2026/06/25', 3: '2026/06/26', 4: '2026/06/27', 5: '2026/06/28', 6: '2026/06/29', 7: '2026/06/30' };
-        const newExp = {
-          id: 'exp-fallback-' + Date.now(),
-          day: activeDay,
-          date: dateMapping[activeDay] || '2026/06/24',
-          category: '食物',
-          item: '隨行餐飲記帳',
-          amount: parsedAmount
-        };
-        setExpenses(prev => [...prev, newExp]);
-        setChatMessages(prev => [...prev, { sender: 'bot', text: `📝 已幫您自動記帳：[食物] 隨行餐飲記帳 ￥${parsedAmount.toLocaleString()}日圓！已同步登錄至費用本中囉。` }]);
-      } else {
-        setChatMessages(prev => [...prev, { sender: 'bot', text: `ごめんなさい！櫻子斷線了 😭 錯誤：${err.message}` }]);
-      }
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  const callGeminiAPI = async (userPrompt, systemInstructionText = "") => {
-    if (!apiKey) {
-      throw new Error("尚未設定 API Key，請先於對話框上方進行配置儲存。");
-    }
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
-    let delay = 1000;
-    for (let i = 0; i < 5; i++) {
-      try {
-        let parts = [{ text: userPrompt }];
-        const payload = {
-          contents: [{ parts: parts }]
-        };
-        if (systemInstructionText) {
-          payload.systemInstruction = { parts: [{ text: systemInstructionText }] };
-        }
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP 錯誤！狀態碼: ${response.status}`);
-        }
-        const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return text;
-        throw new Error("Gemini API 未回傳有效文字內容");
-      } catch (err) {
-        if (i === 4) {
-          throw new Error(err.message || "連接 AI 櫻子秘書超時，請稍候重試。");
-        }
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= 2;
-      }
-    }
-  };
-
-  const handleQuickQuestion = (question) => {
-    setChatInput(question);
-    setTimeout(() => {
-      const form = document.getElementById('ai-chat-form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-    }, 100);
+  // 匯出 Excel (CSV) 完整資料全紀錄
+  const handleExportToExcel = () => {
+    let csvContent = "\uFEFF";
+    csvContent += "========================================================\n";
+    csvContent += "2026 九州 (福岡・佐賀・糸島) 自駕自由行 完整旅行全紀錄總表\n";
+    csvContent += `匯出日期：2026/05/20 | 總預算：JPY ${totalBudget.toLocaleString()} | 匯率參考：0.21\n`;
+    csvContent += "========================================================\n\n";
+    csvContent += "--- 一、 財務預算執行摘要 ---\n";
+    csvContent += "財務指標項目,數值 (JPY),估算數值 (TWD),百分比\n";
+    csvContent += `總預算額度,JPY ${totalBudget.toLocaleString()},NT$ ${Math.round(totalBudget * 0.21).toLocaleString()},100%\n`;
+    csvContent += `已累計支出,JPY ${totalSpentJPY.toLocaleString()},NT$ ${totalSpentTWD.toLocaleString()},${progressPercent}%\n`;
+    csvContent += `剩餘可用預算,JPY ${(totalBudget - totalSpentJPY).toLocaleString()},NT$ ${Math.round((totalBudget - totalSpentJPY) * 0.21).toLocaleString()},${100 - progressPercent}%\n\n`;
+    csvContent += "消費大類類別,累計支出金額 (日圓 JPY),預算佔比\n";
+    Object.keys(categoryBreakdown).forEach(cat => {
+      const amt = categoryBreakdown[cat];
+      const p = Math.round((amt / totalSpentJPY) * 100);
+      csvContent += `"${cat}","JPY ${amt.toLocaleString()}","${p}%"\n`;
+    });
+    csvContent += "\n";
+    csvContent += "--- 二、 每日詳細行程計畫表 ---\n";
+    csvContent += "天數,日期,自駕地區,本日行程主題,本日降雨率,時間點,行程景點名稱,預計停留,景點類別,景點與交通描述,拍照好拍技巧\n";
+    itinerary.forEach(d => {
+      d.spots.forEach(s => {
+        csvContent += `"${`D${d.day}`}","${d.date}","${d.area}","${d.title}","${d.rainChance}","${s.time}","${s.name}","${s.stay}","${s.category}","${(s.desc || '').replace(/"/g, '""')}","${(s.photoTip || '').replace(/"/g, '""')}"\n`;
+      });
+    });
+    csvContent += "\n";
+    csvContent += "--- 三, 消費記帳明細流水帳 ---\n";
+    csvContent += "記帳日期,行程天數,費用大類,消費項目/飯店/餐飲名稱,支出金額 (日圓 JPY),估計折合金額 (台幣 TWD),景點綁定狀態\n";
+    expenses.forEach(item => {
+      csvContent += `"${item.date}","${`D${item.day}`}","${item.category}","${item.item.replace(/"/g, '""')}","${item.amount}","${Math.round(item.amount * 0.21)}","${item.spotName ? `📍 ${item.spotName}` : '獨立消費'}"\n`;
+    });
+    csvContent += "\n";
+    csvContent += "--- 四, 行理準備與日本代購清單 ---\n";
+    csvContent += "清單類別,物理準備項目,需求數量,準備與勾選狀態\n";
+    const categoryNames = {
+      personal: "💼 隨身行李 (證件、貴重與隨身物品)",
+      checked: "🧳 託運行李 (大行李箱與個人裝備)"
+    };
+    Object.keys(packingList).forEach(catKey => {
+      packingList[catKey].forEach(item => {
+        csvContent += `"${categoryNames[catKey]}","${item.text.replace(/"/g, '""')}","${item.qty}","${item.checked ? '已備妥' : '尚未準備'}"\n`;
+      });
+    });
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "2026_九州自由行_財務自駕環線數據庫.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#F5F7FA] font-['Zen_Maru_Gothic',sans-serif] text-[#2C3E50] flex justify-center items-center">
-      {/* Outer Shell using h-screen w-screen overflow-hidden for a true web app experience */}
       <div className="w-full max-w-md h-full bg-white shadow-2xl relative overflow-hidden flex flex-col animate-fade-in">
         
         {/* APP HEADER */}
@@ -1201,9 +929,9 @@ export default function App() {
             <div>
               <div className="flex items-center gap-1 bg-[#FF8E99] text-white text-[11px] font-bold px-2 py-0.5 rounded-full w-max mb-1.5 shadow-sm">
                 <Sparkles size={11} />
-                <span>2026 九州精緻自由行</span>
+                <span>2026 九州自由行</span>
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm font-['Zen_Maru_Gothic']">福岡・佐賀自駕遊</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm font-['Zen_Maru_Gothic']">2026 九州自由行</h1>
               <p className="text-xs text-[#EAF2F8] mt-1 flex items-center gap-1 font-sans">
                 <Calendar size={12} />
                 <span>2026/06/24 — 06/30 (7天6夜)</span>
@@ -1219,18 +947,16 @@ export default function App() {
           {/* 財務與自駕狀態一覽欄 */}
           <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/10 text-center text-xs">
             <div className="bg-white/5 py-1.5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-blue-200 block font-sans">累計支出</span>
+              <span className="text-[10px] text-blue-200 block">累計支出</span>
               <span className="font-bold text-sm text-white font-sans font-bold">￥{totalSpentJPY.toLocaleString()}</span>
             </div>
             <div className="bg-white/5 py-1.5 rounded-xl border border-white/5">
-              <span className="text-[10px] text-blue-200 block font-sans">台幣等值</span>
-              <span className="font-bold text-sm text-yellow-100 font-sans font-bold font-bold font-bold">NT$ {totalSpentTWD.toLocaleString()}</span>
+              <span className="text-[10px] text-blue-200 block">台幣等值</span>
+              <span className="font-bold text-sm text-yellow-100 font-sans font-bold font-bold font-bold font-bold font-bold font-bold">NT$ {totalSpentTWD.toLocaleString()}</span>
             </div>
-            <div className="bg-white/5 py-1.5 rounded-xl border border-white/5 flex items-center justify-center flex-col cursor-pointer hover:bg-white/10 transition-colors" onClick={() => setChatbotOpen(true)}>
-              <span className="text-[10px] text-yellow-200 font-bold block flex items-center gap-0.5 font-sans animate-pulse">
-                <Sparkles size={10} /> AI 秘書
-              </span>
-              <span className="font-bold text-sm text-emerald-300 font-sans">{apiKey ? '櫻子在線' : '待設金鑰'}</span>
+            <div className="bg-white/5 py-1.5 rounded-xl border border-white/5">
+              <span className="text-[10px] text-blue-200 block">剩餘預算</span>
+              <span className="font-bold text-sm text-emerald-300 font-sans font-bold font-bold font-bold">￥{(totalBudget - totalSpentJPY).toLocaleString()}</span>
             </div>
           </div>
         </header>
@@ -1244,17 +970,14 @@ export default function App() {
           {activeTab === 'itinerary' && (
             <div className="space-y-4">
               
-              {/* 天數滑動快速導覽列 */}
+              {/* 天數滑動快速導練列 */}
               <div className="bg-white rounded-3xl p-3 shadow-md border border-[#E9ECF0] overflow-hidden animate-fade-in">
                 <span className="text-xs text-[#7F8C8D] block px-1 mb-2 font-medium font-sans">切換行程日期</span>
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none snap-x">
                   {itinerary.map(d => (
                     <button
                       key={d.day}
-                      onClick={() => {
-                        setActiveDay(d.day);
-                        setDailyAiAnalysisError("");
-                      }}
+                      onClick={() => setActiveDay(d.day)}
                       className={`flex-none snap-start w-12 py-2 rounded-2xl transition-all duration-300 text-center flex flex-col items-center justify-center ${
                         activeDay === d.day
                           ? 'bg-[#2A4B7C] text-white shadow-md shadow-[#2A4B7C]/30 scale-105'
@@ -1278,7 +1001,7 @@ export default function App() {
 
               {/* 每日小提示與天氣穿搭卡片 */}
               {currentDayData && (
-                <div className="bg-[#FDF9F3] border border-[#F3E3CD] rounded-3xl p-4 shadow-sm flex flex-col gap-3 transition-all duration-300 font-sans">
+                <div className="bg-[#FDF9F3] border border-[#F3E3CD] rounded-3xl p-4 shadow-sm flex flex-col gap-3 transition-all duration-300 font-sans font-sans">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="bg-[#E6AF2E] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">
@@ -1314,63 +1037,16 @@ export default function App() {
                       <span className="text-[10px] text-[#C68D00] font-bold">已收闔 (點擊右側開展)</span>
                     </div>
                   )}
-
-                  {/* ✨ LLM FEATURE 1: AI Daily Optimizer Button */}
-                  <div className="border-t border-[#F3E3CD] pt-3 animate-fade-in">
-                    {dailyAiAnalysis[activeDay] ? (
-                      <div className="bg-white rounded-2xl p-3.5 border border-[#F3E3CD] shadow-inner space-y-3 animate-fade-in font-sans">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[11px] font-bold text-[#2A4B7C] flex items-center gap-1">
-                            <Sparkles size={12} className="text-[#FF8E99]" />
-                            <span>AI 櫻子秘書自駕私房推薦 (Gemini 3.1 Flash-Lite)</span>
-                          </span>
-                          <button 
-                            onClick={handleDailyAiAnalysis}
-                            className="text-[10px] text-[#7F8C8D] flex items-center gap-0.5 hover:text-[#2A4B7C]"
-                          >
-                            <RefreshCw size={10} /> 重新優化
-                          </button>
-                        </div>
-                        <div className="text-xs text-[#4A5568] leading-relaxed whitespace-pre-line font-sans prose max-w-none">
-                          {dailyAiAnalysis[activeDay]}
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={handleDailyAiAnalysis}
-                        disabled={aiAnalysisLoading}
-                        className="w-full bg-gradient-to-r from-[#2A4B7C] to-[#436496] text-white py-2 px-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md hover:scale-[1.02] transition-all animate-pulse font-sans"
-                      >
-                        {aiAnalysisLoading ? (
-                          <>
-                            <RefreshCw size={13} className="animate-spin" />
-                            <span>櫻子正串接北九州自駕路網庫中...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles size={13} />
-                            <span>✨ AI 智慧優化：推薦自駕專屬歌單、隱藏美食與過路費提醒</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-                    {aiAnalysisError && (
-                      <div className="mt-2 text-xs text-amber-600 bg-amber-50 rounded-xl p-2.5 border border-amber-200/50 font-sans leading-relaxed">
-                        {aiAnalysisError}
-                      </div>
-                    )}
-                  </div>
                 </div>
               )}
 
-              {/* 每日行程時間軸 (景點與真實住宿卡片) */}
+              {/* 每日行程時間軸 */}
               {currentDayData && currentDayData.spots.length === 0 ? (
-                /* 防呆提示：當行程點被全部刪空時，顯示和風新增起點行程按鈕 */
                 <div className="text-center py-10 bg-white rounded-3xl border border-dashed border-slate-200 space-y-3 font-sans">
                   <Smile size={32} className="mx-auto text-[#FF8E99] animate-bounce" />
                   <p className="text-xs text-[#7F8C8D]">本日尚無行程計畫捏，快來建立九州的第一站行程吧！</p>
                   <button
-                    onClick={() => openSpotModalForAdd(activeDay, 0)}
+                    onClick={() => openSpotModalForAdd(activeDay, 0, '08:00')}
                     className="bg-[#2A4B7C] text-white text-xs font-bold px-5 py-2.5 rounded-2xl shadow-md flex items-center gap-1.5 mx-auto hover:scale-105 active:scale-95 transition-all"
                   >
                     <Plus size={14} />
@@ -1382,10 +1058,10 @@ export default function App() {
                   <div className="relative pl-3 space-y-6 mt-4 animate-slide-up">
                     <div className="absolute left-[21px] top-6 bottom-6 w-0.5 bg-dashed bg-gradient-to-b from-[#2A4B7C] via-[#FF8E99] to-gray-200" style={{ backgroundImage: 'linear-gradient(to bottom, #2A4B7C 60%, rgba(255,255,255,0) 0%)', backgroundSize: '2px 8px', backgroundRepeat: 'repeat-y' }} />
 
-                    {/* 首個景點前的插入按鈕 */}
+                    {/* 首個景點前的插入按鈕：在此前插入預設為 08:00 */}
                     <div className="relative flex justify-center -mb-3 z-20 font-sans">
                       <button
-                        onClick={() => openSpotModalForAdd(activeDay, 0)}
+                        onClick={() => openSpotModalForAdd(activeDay, 0, '08:00')}
                         className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-3 py-1 rounded-full shadow-xs hover:bg-emerald-100 flex items-center gap-0.5 transition-all active:scale-95 ml-6"
                       >
                         <Plus size={11} /> <span>在此前插入新行程</span>
@@ -1394,11 +1070,14 @@ export default function App() {
 
                     {currentDayData.spots.map((spot, idx) => {
                       const style = getCategoryStyle(spot.category);
-                      const journal = journals[spot.id] || { note: '', photo: null };
+                      // 獲取該景點已綁定的所有記帳紀錄
+                      const spotExpensesList = expenses.filter(e => e.spotId === spot.id);
+                      // 計算其後行程的預設時間 (前一行程抵達時間加30分鐘)
+                      const defTimeForNext = addMinutesToTime(spot.time, 30);
 
                       return (
                         <div key={spot.id} className="relative group animate-fade-in font-sans">
-                          {/* 時間軸可愛分類圖標 */}
+                          {/* 時間軸分類圖標 */}
                           <span className={`absolute left-[-16px] top-1.5 w-6 h-6 rounded-full border-4 border-white shadow-md flex items-center justify-center ${style.dot} text-white z-10 transition-transform duration-300 group-hover:scale-125`}>
                             {spot.category === '食物' && <Utensils size={10} />}
                             {spot.category === '購物' && <ShoppingBag size={10} />}
@@ -1430,18 +1109,19 @@ export default function App() {
                             </div>
 
                             {/* 介紹與描述 */}
-                            <p className="text-xs text-[#5D6D7E] leading-relaxed">{spot.desc}</p>
+                            {spot.desc && <p className="text-xs text-[#5D6D7E] leading-relaxed">{spot.desc}</p>}
 
-                            {/* 彩色特色標籤 */}
+                            {/* 特色標籤 */}
                             {spot.tags && spot.tags.length > 0 && (
                               <div className="flex flex-wrap gap-1.5 pt-1 font-sans">
                                 {spot.tags.map(t => (
                                   <span 
                                     key={t} 
                                     className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm ${
-                                      t === '必吃' ? 'bg-[#FF8E99] text-white' : 
-                                      t === '必買' ? 'bg-[#E6AF2E] text-white' : 
-                                      'bg-blue-400 text-white'
+                                      t === '必吃' ? 'bg-[#FF8E99]/10 text-[#FF5A6F] border border-[#FF8E99]/30' : 
+                                      t === '必拍' ? 'bg-blue-50 text-blue-600 border border-blue-200' : 
+                                      t === '必買' ? 'bg-amber-50 text-[#C68D00] border border-[#E6AF2E]/30' :
+                                      'bg-slate-50 text-slate-500 border border-slate-200'
                                     }`}
                                   >
                                     #{t}
@@ -1450,41 +1130,12 @@ export default function App() {
                               </div>
                             )}
 
-                            {/* 拍照必看技巧 */}
-                            {spot.photoTip && (
-                              <div className="bg-gradient-to-r from-blue-50/70 to-indigo-50/50 rounded-2xl p-3 border border-blue-100/50 space-y-1 font-sans">
-                                <span className="text-[10px] font-bold text-[#2A4B7C] flex items-center gap-1 uppercase tracking-wider">
-                                  <Camera size={12} className="text-[#FF8E99]" /> 拍照小秘訣
+                            {/* 實用連結與操作欄 */}
+                            {spot.navUrl && spot.navUrl !== 'https://maps.google.com/?q=' && (
+                              <div className="bg-slate-50 rounded-2xl p-3 border border-gray-100 flex justify-between items-center text-[11px] text-[#5D6D7E]">
+                                <span className="text-gray-400 font-sans">
+                                  🕒 預估停留: {spot.stay}
                                 </span>
-                                <p className="text-xs text-slate-600 leading-normal">{spot.photoTip}</p>
-                              </div>
-                            )}
-
-                            {/* 自駕備份實用資訊欄 (包含停車場與加油站) */}
-                            <div className="bg-slate-50 rounded-2xl p-3 border border-gray-100 space-y-2 text-[11px] text-[#5D6D7E]">
-                              <div className="grid grid-cols-2 gap-2 pb-1 border-b border-gray-100">
-                                <div>
-                                  <span className="text-[9px] text-[#7F8C8D] block uppercase font-bold">停車場指引</span>
-                                  <span className="font-medium text-slate-700">{spot.parking}</span>
-                                </div>
-                                <div>
-                                  <span className="text-[9px] text-[#7F8C8D] block uppercase font-bold">最近加油站</span>
-                                  <span className="font-medium text-slate-700">{spot.gas}</span>
-                                </div>
-                              </div>
-                              
-                              <div className="flex justify-between items-center pt-1 font-sans">
-                                <button
-                                  onClick={() => {
-                                    setChatbotOpen(true);
-                                    handleQuickQuestion(`能幫我深度導覽「${spot.name}」嗎？包含在地的歷史典故、必看精華細節、更精確的自駕交通小叮嚀！`);
-                                  }}
-                                  className="text-[10px] font-bold text-[#FF8E99] bg-[#FF8E99]/5 hover:bg-[#FF8E99]/10 border border-[#FF8E99]/25 px-2 py-0.5 rounded-md flex items-center gap-0.5 transition-colors"
-                                >
-                                  <Sparkles size={9} />
-                                  <span>✨ AI 景點導覽</span>
-                                </button>
-                                
                                 <a 
                                   href={spot.navUrl} 
                                   target="_blank" 
@@ -1492,46 +1143,94 @@ export default function App() {
                                   className="flex items-center gap-1 text-[#2A4B7C] font-bold hover:underline transition-all"
                                 >
                                   <Navigation size={12} className="text-[#FF8E99]" />
-                                  <span>{spot.category === '酒店' ? '開啟住宿資訊' : '地圖導航資訊'}</span>
+                                  <span>{spot.category === '酒店' ? '住宿資訊' : 'Google Map導航'}</span>
                                 </a>
                               </div>
-                            </div>
+                            )}
 
-                            {/* 隨行旅記照片上傳與日誌紀錄 */}
-                            <div className="border-t border-gray-100 pt-3 space-y-2 font-sans">
-                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">隨行旅記相片牆 (可點擊上傳或相機拍照)</span>
-                              
-                              <div className="grid grid-cols-3 gap-2">
-                                <label className="border-2 border-dashed border-gray-200 hover:border-[#FF8E99] rounded-2xl aspect-square flex flex-col items-center justify-center cursor-pointer transition-all bg-gray-50 hover:bg-white relative overflow-hidden">
-                                  <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    capture="environment" // 行動裝置直啟相機
-                                    className="hidden" 
-                                    onChange={(e) => handlePhotoUpload(spot.id, e)}
-                                  />
-                                  {journal.photo ? (
-                                    <img src={journal.photo} alt="User Uploaded" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="text-center p-2 text-gray-400">
-                                      <Upload size={16} className="mx-auto mb-1 text-gray-300" />
-                                      <span className="text-[8px] block font-sans">上傳/拍照</span>
+                            {/* 💳 景點專屬消費記錄區 */}
+                            <div className="border-t border-gray-100 pt-3 space-y-3 font-sans">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                                  <ShoppingBag size={13} className="text-[#3B629B]" />
+                                  <span>📍 景點消費紀錄</span>
+                                </span>
+                                <span className="text-[10px] text-gray-400">
+                                  自動彙整至消費流水帳
+                                </span>
+                              </div>
+
+                              {/* 列表：顯示該景點已有的開銷 */}
+                              <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                                {spotExpensesList.length === 0 ? (
+                                  <p className="text-[11px] text-gray-400 italic py-1">此景點暫無登錄消費，請在下方新增。</p>
+                                ) : (
+                                  spotExpensesList.map(e => (
+                                    <div key={e.id} className="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border border-gray-100/50">
+                                      <div className="flex items-center gap-1.5 min-w-0 font-sans font-sans">
+                                        <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md shrink-0">
+                                          {e.category}
+                                        </span>
+                                        <span className="font-medium text-slate-700 truncate">{e.item}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 shrink-0">
+                                        <span className="font-bold text-slate-800">￥{e.amount.toLocaleString()}</span>
+                                        <button 
+                                          onClick={() => handleDeleteExpense(e.id)}
+                                          className="text-gray-300 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                                        >
+                                          <Trash2 size={12} />
+                                        </button>
+                                      </div>
                                     </div>
-                                  )}
-                                </label>
+                                  ))
+                                )}
+                              </div>
 
-                                <div className="col-span-2">
-                                  <textarea
-                                    value={journal.note}
-                                    onChange={(e) => handleJournalNoteChange(spot.id, e.target.value)}
-                                    placeholder="在此寫下本日心得、必吃名特產口感、以及開車過路心得，或者直接寫下開銷花費以便未來統計..."
-                                    className="w-full h-full text-xs border border-gray-100 rounded-2xl p-2 focus:ring-1 focus:ring-[#2A4B7C] bg-slate-50/50 resize-none font-sans text-slate-700"
+                              {/* 快速新增此景點的消費項目 */}
+                              <div className="bg-slate-50/50 p-2.5 rounded-2xl border border-dashed border-gray-200 space-y-2">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <input 
+                                    type="text" 
+                                    placeholder="項目 (如：特產、門票、午餐)"
+                                    value={spotExpenseInputs[spot.id]?.item || ''}
+                                    onChange={(e) => handleSpotInputChange(spot.id, 'item', e.target.value)}
+                                    className="text-[11px] border border-gray-200 rounded-xl p-1.5 focus:outline-none bg-white text-slate-700"
                                   />
+                                  <input 
+                                    type="number" 
+                                    placeholder="金額 (日圓 JPY)"
+                                    value={spotExpenseInputs[spot.id]?.amount || ''}
+                                    onChange={(e) => handleSpotInputChange(spot.id, 'amount', e.target.value)}
+                                    className="text-[11px] border border-gray-200 rounded-xl p-1.5 focus:outline-none bg-white text-slate-700"
+                                  />
+                                </div>
+                                <div className="flex justify-between items-center gap-2">
+                                  <select
+                                    value={spotExpenseInputs[spot.id]?.category || '食物'}
+                                    onChange={(e) => handleSpotInputChange(spot.id, 'category', e.target.value)}
+                                    className="text-[11px] border border-gray-200 rounded-xl p-1.5 bg-white text-slate-700 focus:outline-none"
+                                  >
+                                    <option value="食物">🍜 食物</option>
+                                    <option value="購物">🛍 購物</option>
+                                    <option value="交通">🚗 交通</option>
+                                    <option value="活動">🎟 活動</option>
+                                    <option value="住宿">🏨 住宿</option>
+                                    <option value="其他">📦 其他</option>
+                                  </select>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSpotExpenseAddLocal(spot, currentDayData.day, currentDayData.date)}
+                                    className="bg-[#2A4B7C] hover:bg-blue-800 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-0.5 shrink-0"
+                                  >
+                                    <Plus size={11} />
+                                    <span>登錄花費</span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
 
-                            {/* ✏️ 行程編輯、刪除與靈活插入按鈕列 */}
+                            {/* ✏️ 行程編輯與管理 (呼叫客製彈窗與傳遞加時時間) */}
                             <div className="border-t border-gray-100 pt-3 flex justify-between items-center text-[11px] font-bold font-sans">
                               <div className="flex gap-2">
                                 <button
@@ -1542,17 +1241,20 @@ export default function App() {
                                   <Edit size={11} /> <span>編輯景點</span>
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteSpot(activeDay, spot.id)}
+                                  onClick={() => {
+                                    // 確保帶入有提示警報的花費聯動移除確認視窗
+                                    initiateDeleteSpot(activeDay, spot.id, spot.name);
+                                  }}
                                   className="text-red-600 hover:text-red-800 bg-red-50 px-2 py-1 rounded-lg flex items-center gap-0.5 transition-all active:scale-95"
                                   title="刪除此行程"
                                 >
-                                  <Trash size={11} /> <span>刪除景點</span>
+                                  <Trash2 size={11} /> <span>刪除景點</span>
                                 </button>
                               </div>
 
                               <button
-                                onClick={() => openSpotModalForAdd(activeDay, idx + 1)}
-                                className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg flex items-center gap-0.5 transition-all active:scale-95 font-sans"
+                                onClick={() => openSpotModalForAdd(activeDay, idx + 1, defTimeForNext)}
+                                className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg flex items-center gap-0.5 transition-all active:scale-95"
                                 title="在此景點後方插入一個新行程"
                               >
                                 <Plus size={11} /> <span>在其後插入行程</span>
@@ -1561,16 +1263,13 @@ export default function App() {
 
                           </div>
 
-                          {/* 轉接交通引導 */}
-                          {idx < currentDayData.spots.length - 1 && (
-                            <div className="my-2 ml-10 flex items-center gap-2 text-xs text-[#7F8C8D] font-sans">
+                          {/* 轉接交通方式 */}
+                          {idx < currentDayData.spots.length - 1 && spot.transitNext && (
+                            <div className="my-2 ml-10 flex items-center gap-2 text-xs text-[#7F8C8D] font-sans font-sans font-sans font-sans font-sans">
                               <span className="bg-[#EAF2F8] p-1 rounded-lg text-[#2A4B7C]">
                                 🚗
                               </span>
-                              <span className="font-medium">交通指引：{spot.transitNext}</span>
-                              <span className="bg-slate-100 px-1.5 py-0.5 rounded font-bold text-[10px]">
-                                {spot.transitTime}
-                              </span>
+                              <span className="font-medium">交通方式：{spot.transitNext}</span>
                             </div>
                           )}
                         </div>
@@ -1584,7 +1283,7 @@ export default function App() {
           )}
 
           {/* ======================================================== */}
-          {/* 記帳理財分頁 (EXPENSES) */}
+          {/* 記帳理財總覽分頁 (EXPENSES) */}
           {/* ======================================================== */}
           {activeTab === 'expenses' && (
             <div className="space-y-4 animate-fade-in font-sans">
@@ -1592,12 +1291,12 @@ export default function App() {
               {/* 預算統計看板卡片 */}
               <div className="bg-[#2A4B7C] text-white rounded-[2rem] p-5 shadow-lg relative overflow-hidden">
                 <div className="absolute right-[-20px] top-[-20px] w-32 h-32 bg-white/5 rounded-full" />
-                <span className="text-[10px] font-bold text-yellow-300 uppercase tracking-widest block font-sans">2026 九州自駕記帳本</span>
-                <h3 className="text-lg font-bold mt-1 font-sans">財務預算控管與理財分析</h3>
+                <span className="text-[10px] font-bold text-yellow-300 uppercase tracking-widest block font-sans">2026 九州自由行記帳本</span>
+                <h3 className="text-lg font-bold mt-1 font-sans font-sans font-sans">財務預算控管與理財分析</h3>
 
                 {/* 預算比進度條 */}
                 <div className="mt-4 space-y-2">
-                  <div className="flex justify-between text-xs text-blue-100 font-sans">
+                  <div className="flex justify-between text-xs text-blue-100 font-sans font-sans">
                     <span>已用預算比: {progressPercent}%</span>
                     <span>預算總額: ￥{totalBudget.toLocaleString()} JPY</span>
                   </div>
@@ -1611,66 +1310,47 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/10 text-center font-sans">
+                <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/10 text-center">
                   <div>
-                    <span className="text-[10px] text-blue-200 block">實際累計支出 (日圓)</span>
-                    <span className="font-bold text-sm text-white font-sans">￥{totalSpentJPY.toLocaleString()}</span>
+                    <span className="text-[10px] text-blue-200 block font-sans font-sans font-sans font-sans">實際累計支出 (日圓)</span>
+                    <span className="font-bold text-lg text-white font-sans font-sans font-sans font-sans">￥{totalSpentJPY.toLocaleString()}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-blue-200 block font-sans">折合台幣 (依0.21估算)</span>
+                    <span className="text-[10px] text-blue-200 block">折合台幣 (依0.21估算)</span>
                     <span className="font-bold text-lg text-yellow-200">NT$ {totalSpentTWD.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
 
               {/* 📥 智慧 Excel 一鍵匯出按鈕區塊 */}
-              <div className="bg-white rounded-3xl p-4 shadow-md border border-[#E9ECF0] text-center space-y-2 font-sans">
-                <p className="text-xs text-[#5D6D7E] leading-relaxed">
-                  想要整理紙本或者與旅伴分攤費用嗎？您可以一鍵將「所有每日行程、飯店憑證、記帳流水帳、打包準備清單」以 Excel (CSV) 格式打包匯出！
+              <div className="bg-white rounded-3xl p-4 shadow-md border border-[#E9ECF0] text-center space-y-2 font-sans font-sans font-sans font-sans font-sans font-sans">
+                <p className="text-xs text-[#5D6D7E] leading-relaxed font-sans">
+                  想要整理紙本或者與旅伴分攤費用嗎？您可以一鍵將「所有每日行程、住宿資訊、記帳流水帳、打包準備清單」以 Excel (CSV) 格式打包匯出！
                 </p>
                 <button 
                   onClick={handleExportToExcel}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-95 font-sans"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-95 font-sans font-sans"
                 >
                   <Download size={15} />
                   <span>📥 匯出 Excel 旅行全紀錄報表</span>
                 </button>
               </div>
 
-              {/* AI 相機與對話自動記帳引導 */}
-              <div className="bg-gradient-to-r from-emerald-500/10 to-[#2A4B7C]/10 border border-[#FF8E99]/20 rounded-3xl p-4 flex items-start gap-3 shadow-sm font-sans font-sans">
-                <div className="bg-emerald-500/10 p-2 rounded-2xl text-emerald-600 shrink-0">
-                  <Bot size={20} className="animate-bounce" />
-                </div>
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-emerald-800 block font-sans">櫻子 AI 語意與相機智慧記帳</span>
-                  <p className="text-[11px] text-[#5D6D7E] leading-relaxed font-sans font-sans">
-                    您可以拍下日本商家明細，或者直接在右下角聊天室發送：「<strong>記帳 一蘭拉麵 1500</strong>」。櫻子將自動解析並將其登錄至下方！
-                  </p>
-                  <button 
-                    onClick={() => setChatbotOpen(true)}
-                    className="mt-2 text-[10px] bg-[#2A4B7C] text-white px-3 py-1 rounded-full font-bold flex items-center gap-1 shadow-sm font-sans"
-                  >
-                    <Sparkles size={11} /> 開啟 AI 智慧對話記帳 (Gemini 3.1 Flash-Lite)
-                  </button>
-                </div>
-              </div>
-
-              {/* 手動登錄費用紀錄表單 */}
+              {/* 手動獨立登錄費用紀錄表單 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans font-sans font-sans font-sans font-sans font-sans font-sans">
                   <Plus size={14} className="text-[#FF8E99]" />
-                  <span>手動新增消費款項</span>
+                  <span>新增常規獨立花費 (如：ETC儲值、免稅採購)</span>
                 </span>
 
-                <form onSubmit={handleAddExpenseManual} className="space-y-3 font-sans">
+                <form onSubmit={handleAddExpenseManual} className="space-y-3">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans">消費日期</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans font-sans font-sans font-sans font-sans font-sans">消費日期</label>
                       <select 
                         value={expFormDate}
                         onChange={(e) => setExpFormDate(e.target.value)}
-                        className="w-full text-xs border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-700 font-sans"
+                        className="w-full text-xs border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-700"
                       >
                         <option value="2026/06/24">D1 (6/24 博多)</option>
                         <option value="2026/06/25">D2 (6/25 佐賀太良)</option>
@@ -1683,15 +1363,15 @@ export default function App() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold">費用類別</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans">費用類別</label>
                       <select 
                         value={expFormCategory}
                         onChange={(e) => setExpFormCategory(e.target.value)}
-                        className="w-full text-xs border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-700"
+                        className="w-full text-xs border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-700 font-sans font-sans font-sans font-sans font-sans"
                       >
                         <option value="食物">🍜 食物</option>
-                        <option value="交通">🚗 交通</option>
                         <option value="購物">🛍 購物</option>
+                        <option value="交通">🚗 交通</option>
                         <option value="活動">🎟 活動</option>
                         <option value="住宿">🏨 住宿</option>
                         <option value="其他">📦 其他</option>
@@ -1699,19 +1379,19 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 font-sans font-sans">
+                  <div className="grid grid-cols-3 gap-2 font-sans font-sans font-sans font-sans font-sans">
                     <div className="col-span-2">
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold">消費項目名稱</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans font-sans font-sans font-sans font-sans">消費項目名稱</label>
                       <input 
                         type="text" 
                         value={expFormItem}
                         onChange={(e) => setExpFormItem(e.target.value)}
-                        placeholder="例：活烏賊餐券、伴手禮盒..."
-                        className="w-full text-xs border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] text-slate-700"
+                        placeholder="例：自駕油錢、免稅藥妝..."
+                        className="w-full text-xs border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] text-slate-700 font-sans"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold font-sans">金額 (日圓)</label>
+                      <label className="text-[10px] text-[#7F8C8D] block mb-1 font-bold">金額 (日圓)</label>
                       <input 
                         type="number" 
                         value={expFormAmount}
@@ -1725,46 +1405,45 @@ export default function App() {
                   <button 
                     type="submit"
                     disabled={!expFormItem.trim() || !expFormAmount}
-                    className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white font-bold py-2 rounded-2xl text-xs transition-all shadow-md flex items-center justify-center gap-1 disabled:opacity-50"
+                    className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white p-2 px-3 py-2 rounded-xl hover:bg-[#1E3A5F] font-bold text-xs transition-all flex items-center justify-center gap-1 font-sans"
                   >
                     <Plus size={13} />
-                    <span>登錄此筆費用紀錄</span>
+                    <span>登錄常規消費</span>
                   </button>
                 </form>
               </div>
 
               {/* 類別比例結構分析 */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 animate-fade-in font-sans">
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 animate-fade-in font-sans font-sans">
                 <span className="text-xs font-bold text-slate-800 block">各項消費分類比例分析</span>
                 <div className="grid grid-cols-3 gap-2">
                   {Object.keys(categoryBreakdown).map(cat => {
                     const amt = categoryBreakdown[cat];
                     const percent = Math.round((amt / totalSpentJPY) * 100);
                     return (
-                      <div key={cat} className="bg-slate-50 rounded-2xl p-2.5 text-center border border-gray-100">
-                        <span className="text-[10px] text-gray-400 block font-sans">{cat}</span>
+                      <div key={cat} className="bg-slate-50 rounded-2xl p-2.5 text-center border border-gray-100 font-sans font-sans font-sans">
+                        <span className="text-[10px] text-gray-400 block">{cat}</span>
                         <strong className="text-xs text-slate-800 block mt-0.5">￥{amt.toLocaleString()}</strong>
-                        <span className="text-[9px] text-[#2A4B7C] block font-sans">{percent}%</span>
+                        <span className="text-[9px] text-[#2A4B7C] block font-sans font-sans font-sans">{percent}%</span>
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              {/* 詳細費用記帳明細流 */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3">
-                <div className="flex justify-between items-center font-sans">
-                  <span className="text-xs font-bold text-slate-800 font-sans">已登錄消費流水明細</span>
-                  <span className="text-[10px] text-gray-400 font-sans">共 {expenses.length} 筆款項</span>
+              {/* 詳細費用記帳明細流 (完美整合景點與一般記帳) */}
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans font-sans font-sans">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-slate-800 font-sans font-sans font-sans font-sans font-sans">已登錄消費流水明細</span>
+                  <span className="text-[10px] text-gray-400">共 {expenses.length} 筆款項</span>
                 </div>
 
-                {/* 滾動區，不被 AI Button 及 Nav Bar 阻擋 */}
-                <div className="space-y-2 divide-y divide-gray-100 pr-1 max-h-[40vh] overflow-y-auto">
+                <div className="space-y-2 divide-y divide-gray-100 pr-1 max-h-[40vh] overflow-y-auto font-sans font-sans font-sans font-sans">
                   {expenses.slice().reverse().map(item => {
                     const style = getCategoryStyle(item.category);
                     return (
-                      <div key={item.id} className="pt-2.5 flex items-center justify-between gap-2 hover:bg-slate-50/50 rounded-xl px-1 transition-colors font-sans">
-                        <div className="flex items-center gap-2.5 min-w-0">
+                      <div key={item.id} className="pt-2.5 flex items-center justify-between gap-2 hover:bg-slate-50/50 rounded-xl px-1 transition-colors font-sans font-sans font-sans font-sans font-sans">
+                        <div className="flex items-center gap-2.5 min-w-0 font-sans">
                           <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] ${style.dot} text-white shrink-0`}>
                             {item.category === '食物' && <Utensils size={12} />}
                             {item.category === '購物' && <ShoppingBag size={12} />}
@@ -1774,12 +1453,19 @@ export default function App() {
                             {item.category === '其他' && <FileText size={12} />}
                           </span>
                           <div className="truncate font-sans font-sans">
-                            <span className="text-xs font-bold text-slate-800 block truncate font-sans">{item.item}</span>
-                            <span className="text-[9px] text-gray-400 block font-sans">D{item.day} ({item.date}) · {item.category}</span>
+                            <span className="text-xs font-bold text-slate-800 block truncate font-sans font-sans font-sans font-sans font-sans font-sans font-sans font-sans">{item.item}</span>
+                            
+                            {/* 顯示景點綁定狀態 */}
+                            {item.spotName ? (
+                              <span className="text-[10px] text-blue-600 font-bold block mt-0.5 font-sans font-sans font-sans font-sans font-sans">
+                                📍 於: {item.spotName}
+                              </span>
+                            ) : (
+                              <span className="text-[9px] text-gray-400 block mt-0.5">D{item.day} ({item.date}) · 一般記帳</span>
+                            )}
                           </div>
                         </div>
 
-                        {/* 這裡的刪除按鈕安全排開在右側，寬度足夠且不被遮擋 */}
                         <div className="flex items-center gap-2 shrink-0">
                           <div className="text-right">
                             <span className="text-xs font-bold text-slate-800 block font-sans">￥{item.amount.toLocaleString()}</span>
@@ -1788,8 +1474,7 @@ export default function App() {
                           
                           <button 
                             onClick={() => handleDeleteExpense(item.id)}
-                            className="text-gray-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 transition-colors font-sans"
-                            title="刪除此筆記帳"
+                            className="text-gray-300 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -1811,10 +1496,10 @@ export default function App() {
               
               {/* 自駕地圖看板 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 text-center">
-                <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider font-sans">
-                  2026 九州自駕環線圖 (台灣 ✈ 福岡 🚗 佐賀 🚗 絲島 🚗 福岡)
+                <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider font-sans font-sans font-sans">
+                  2026 九州自駕環線圖 (台灣 ✈ 福岡 🚗 佐賀 🚗 糸島 🚗 福岡)
                 </span>
-                <h3 className="font-bold text-[#2A4B7C] text-base">7天6夜完整環形開車路線</h3>
+                <h3 className="font-bold text-[#2A4B7C] text-base font-sans">7天6夜完整環形開車路線</h3>
                 
                 {/* SVG 自駕地圖示意 */}
                 <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center justify-center relative overflow-hidden">
@@ -1840,7 +1525,7 @@ export default function App() {
                     <path d="M200 60 L140 100 L110 160 L100 120 L60 110 L50 80 L90 50 L145 40 L200 60" 
                           fill="none" stroke="#E6AF2E" strokeWidth="1.5" strokeDasharray="4,4" />
 
-                    {/* Nodes */}
+                    {/* Nodes (更正糸島的字以及將糸島、太良町的紅點更換為景點對齊之深藍色，保留飛航粉紅色) */}
                     <g transform="translate(30,180)">
                       <circle r="6" fill="#FF5A6F" />
                       <circle r="3" fill="#FFFFFF" />
@@ -1849,15 +1534,15 @@ export default function App() {
                     <g transform="translate(200,60)">
                       <circle r="7" fill="#2A4B7C" />
                       <circle r="3" fill="#FFFFFF" />
-                      <text x="10" y="4" className="text-[10px] font-bold fill-[#2A4B7C] font-sans">福岡 (博多)</text>
+                      <text x="10" y="4" className="text-[10px] font-bold fill-[#2A4B7C] font-sans font-sans font-sans">福岡 (博多)</text>
                     </g>
                     <g transform="translate(140,100)">
                       <circle r="5" fill="#2A4B7C" />
                       <text x="-35" y="-6" className="text-[9px] font-bold fill-[#4A5568] font-sans">佐賀市</text>
                     </g>
                     <g transform="translate(110,160)">
-                      <circle r="5" fill="#FF5A6F" />
-                      <text x="10" y="4" className="text-[9px] font-bold fill-red-500 font-sans">太良町 (海中鳥居)</text>
+                      <circle r="5" fill="#2A4B7C" />
+                      <text x="10" y="4" className="text-[9px] font-bold fill-[#4A5568] font-sans">太良町 (海中鳥居)</text>
                     </g>
                     <g transform="translate(100,120)">
                       <circle r="5" fill="#2A4B7C" />
@@ -1865,19 +1550,19 @@ export default function App() {
                     </g>
                     <g transform="translate(60,110)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans">有田陶瓷</text>
+                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans font-sans font-sans">有田陶瓷</text>
                     </g>
                     <g transform="translate(50,80)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-40" y="2" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans">伊萬里</text>
+                      <text x="-40" y="2" className="text-[9px] font-bold fill-[#4A5568] font-sans">伊萬里</text>
                     </g>
                     <g transform="translate(90,50)">
                       <circle r="5" fill="#2A4B7C" />
-                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans">唐津城</text>
+                      <text x="-30" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans">唐津城</text>
                     </g>
                     <g transform="translate(145,40)">
-                      <circle r="5" fill="#FF5A6F" />
-                      <text x="0" y="-8" className="text-[9px] font-bold fill-indigo-600 font-sans">絲島半島</text>
+                      <circle r="5" fill="#2A4B7C" />
+                      <text x="0" y="-8" className="text-[9px] font-bold fill-[#4A5568] font-sans font-sans">糸島半島</text>
                     </g>
 
                     <text x="100" y="110" className="text-sm">✈</text>
@@ -1887,24 +1572,24 @@ export default function App() {
               </div>
 
               {/* 氣象與每日降雨預報表 */}
-              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3">
+              <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
                 <span className="text-xs font-bold text-gray-400 block uppercase font-sans">每日區域預報 (2026/06/24 - 06/30)</span>
-                <div className="divide-y divide-gray-100 font-sans">
+                <div className="divide-y divide-gray-100 font-sans font-sans font-sans font-sans">
                   {itinerary.map(d => (
-                    <div key={d.day} className="py-3 flex items-center justify-between gap-2 animate-fade-in font-sans">
+                    <div key={d.day} className="py-3 flex items-center justify-between gap-2 animate-fade-in font-sans font-sans font-sans font-sans font-sans">
                       <div className="flex items-center gap-2">
-                        <span className="bg-[#2A4B7C] text-white font-bold font-sans text-[10px] w-6 h-6 rounded-full flex items-center justify-center font-sans">
+                        <span className="bg-[#2A4B7C] text-white font-bold font-sans text-[10px] w-6 h-6 rounded-full flex items-center justify-center">
                           D{d.day}
                         </span>
                         <div>
                           <span className="text-xs font-bold text-slate-800 block">{d.area}</span>
-                          <span className="text-[9px] text-gray-400 block">{d.date.split(' ')[0]}</span>
+                          <span className="text-[9px] text-gray-400 block font-sans">{d.date.split(' ')[0]}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <span className="text-xs font-bold font-sans text-slate-700 block">{d.temp}</span>
+                          <span className="text-xs font-bold font-sans text-slate-700 block font-sans font-sans font-sans font-sans font-sans">{d.temp}</span>
                           <span className="text-[9px] text-gray-400 block">體感約 28°C</span>
                         </div>
 
@@ -1914,9 +1599,9 @@ export default function App() {
                           ) : (
                             <CloudSun size={16} className="text-orange-400" />
                           )}
-                          <div className="text-left font-sans">
-                            <span className="text-[9px] text-gray-400 block">降水率</span>
-                            <span className="text-[10px] font-bold text-[#2A4B7C] block">{d.rainChance}</span>
+                          <div className="text-left font-sans font-sans">
+                            <span className="text-[9px] text-gray-400 block">降雨機率</span>
+                            <span className="text-[10px] font-bold text-[#2A4B7C] block font-sans font-sans font-sans font-sans font-sans font-sans">{d.rainChance}</span>
                           </div>
                         </div>
                       </div>
@@ -1929,7 +1614,7 @@ export default function App() {
           )}
 
           {/* ======================================================== */}
-          {/* 行行指南與行李打包分頁 (GUIDE) */}
+          {/* 旅行指南與行李打包分頁 (GUIDE) */}
           {/* ======================================================== */}
           {activeTab === 'guide' && (
             <div className="space-y-5 animate-fade-in font-sans">
@@ -1938,20 +1623,20 @@ export default function App() {
               <div className="bg-gradient-to-br from-[#2A4B7C] to-[#436496] rounded-3xl p-4 text-white shadow-md space-y-2">
                 <div className="flex items-center gap-1.5 text-yellow-200">
                   <BookOpen size={16} />
-                  <span className="text-xs font-bold uppercase tracking-wider font-sans">旅行工具箱 ＆ 行前準備</span>
+                  <span className="text-xs font-bold uppercase tracking-wider font-sans font-sans">旅行工具箱 ＆ 行前準備</span>
                 </div>
-                <h3 className="text-base font-bold font-sans">九州自由行・數位隨身錦囊</h3>
-                <p className="text-xs text-blue-100 leading-relaxed font-sans">
-                  包含行李打包檢查、日本自駕規則、以及與您提供明細 100% 同步的真實 Booking 訂房憑證！
+                <h3 className="text-base font-bold font-sans font-sans font-sans">九州自由行・數位隨身錦囊</h3>
+                <p className="text-xs text-blue-100 leading-relaxed">
+                  包含行李打包檢查、日本自駕規則、以及住宿資訊！
                 </p>
               </div>
 
               {/* 1. 行李清單管理庫 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-4">
-                <div className="flex justify-between items-center font-sans font-sans">
+                <div className="flex justify-between items-center font-sans">
                   <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                     <CheckSquare size={14} className="text-[#FF8E99]" />
-                    <span>行李打包與日本購物清單</span>
+                    <span>行李打包與準備清單</span>
                   </span>
                   
                   {/* 切換編輯與保存狀態按鈕 */}
@@ -1978,17 +1663,17 @@ export default function App() {
                 </div>
 
                 <div className="space-y-4 pt-1 font-sans">
-                  {/* Category: 隨身 */}
-                  <div className="space-y-2.5 font-sans">
-                    <h4 className="text-xs font-bold text-[#2A4B7C] bg-[#EAF2F8] px-2.5 py-1 rounded-lg w-max font-sans font-sans font-sans">
-                      💼 隨身背包 (證件貴重物品)
+                  {/* Category: 隨身行李 */}
+                  <div className="space-y-2.5 font-sans font-sans font-sans">
+                    <h4 className="text-xs font-bold text-[#2A4B7C] bg-[#EAF2F8] px-2.5 py-1 rounded-lg w-max font-sans font-sans">
+                      💼 隨身行李 (證件、貴重與隨身物品)
                     </h4>
                     <div className="space-y-1.5 font-sans">
                       {packingList.personal.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-all border border-gray-50">
+                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-all border border-gray-100">
                           
-                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
-                            <span onClick={() => toggleItem('personal', item.id)} className="shrink-0">
+                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans font-sans font-sans">
+                            <span onClick={() => toggleItem('personal', item.id)} className="shrink-0 font-sans font-sans">
                               {item.checked ? (
                                 <CheckSquare size={16} className="text-[#FF8E99]" />
                               ) : (
@@ -2001,7 +1686,7 @@ export default function App() {
                                 type="text"
                                 value={item.text}
                                 onChange={(e) => handleEditPackingText('personal', item.id, e.target.value)}
-                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
+                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
                               />
                             ) : (
                               <span 
@@ -2015,9 +1700,9 @@ export default function App() {
 
                           <div className="flex items-center gap-2 shrink-0">
                             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
-                              <button onClick={() => adjustQty('personal', item.id, -1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold">-</button>
-                              <span className="px-2 text-[10px] font-bold text-slate-700 bg-white">{item.qty}</span>
-                              <button onClick={() => adjustQty('personal', item.id, 1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold">+</button>
+                              <button onClick={() => adjustQty('personal', item.id, -1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans">-</button>
+                              <span className="px-2 text-[10px] font-bold text-slate-700 bg-white font-sans">{item.qty}</span>
+                              <button onClick={() => adjustQty('personal', item.id, 1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans font-sans font-sans font-sans font-sans">+</button>
                             </div>
                             <button 
                               onClick={() => deleteItem('personal', item.id)} 
@@ -2032,125 +1717,17 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Category: 手提 */}
-                  <div className="space-y-2.5 font-sans">
-                    <h4 className="text-xs font-bold text-[#2A4B7C] bg-[#EAF2F8] px-2.5 py-1 rounded-lg w-max font-sans">
-                      🛫 手提行李 (隨身攜帶)
-                    </h4>
-                    <div className="space-y-1.5">
-                      {packingList.cabin && packingList.cabin.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-xl transition-all border border-gray-50 font-sans font-sans">
-                          
-                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
-                            <span onClick={() => toggleItem('cabin', item.id)} className="shrink-0">
-                              {item.checked ? (
-                                <CheckSquare size={16} className="text-[#FF8E99]" />
-                              ) : (
-                                <Square size={16} className="text-gray-300" />
-                              )}
-                            </span>
-                            
-                            {isPackingEditMode ? (
-                              <input 
-                                type="text"
-                                value={item.text}
-                                onChange={(e) => handleEditPackingText('cabin', item.id, e.target.value)}
-                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                              />
-                            ) : (
-                              <span 
-                                onClick={() => toggleItem('cabin', item.id)}
-                                className={`text-xs truncate ${item.checked ? 'line-through text-gray-400 font-medium' : 'text-slate-700'}`}
-                              >
-                                {item.text}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
-                              <button onClick={() => adjustQty('cabin', item.id, -1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans">-</button>
-                              <span className="px-2 text-[10px] font-bold text-slate-700 bg-white font-sans">{item.qty}</span>
-                              <button onClick={() => adjustQty('cabin', item.id, 1)} className="px-1.5 py-0.5 bg-gray-50 text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans">+</button>
-                            </div>
-                            <button 
-                              onClick={() => deleteItem('cabin', item.id)} 
-                              className="text-gray-300 hover:text-red-500 p-1.5"
-                              title="移除"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Category: 託運 */}
+                  {/* Category: 託運行李 */}
                   <div className="space-y-2.5 font-sans font-sans">
-                    <h4 className="text-xs font-bold text-[#2A4B7C] bg-[#EAF2F8] px-2.5 py-1 rounded-lg w-max font-sans">
-                      🧳 託運行李 (行李箱託運)
+                    <h4 className="text-xs font-bold text-[#C68D00] bg-yellow-50 px-2.5 py-1 rounded-lg w-max font-sans font-sans">
+                      🧳 託運行李 (大行李箱與個人裝備)
                     </h4>
                     <div className="space-y-1.5">
                       {packingList.checked.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-[#F5F7FA] rounded-xl transition-all border border-gray-50 font-sans">
+                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-[#F5F7FA] rounded-xl transition-all border border-gray-100 font-sans">
                           
-                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
-                            <span onClick={() => toggleItem('checked', item.id)} className="shrink-0 font-sans font-sans">
-                              {item.checked ? (
-                                <CheckSquare size={16} className="text-[#FF8E99]" />
-                              ) : (
-                                <Square size={16} className="text-gray-300" />
-                              )}
-                            </span>
-                            
-                            {isPackingEditMode ? (
-                              <input 
-                                type="text"
-                                value={item.text}
-                                onChange={(e) => handleEditPackingText('checked', item.id, e.target.value)}
-                                className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                              />
-                            ) : (
-                              <span 
-                                onClick={() => toggleItem('checked', item.id)}
-                                className={`text-xs truncate ${item.checked ? 'line-through text-gray-400 font-medium' : 'text-slate-700'}`}
-                              >
-                                {item.text}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
-                              <button onClick={() => adjustQty('checked', item.id, -1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans">-</button>
-                              <span className="px-2 text-[10px] font-bold text-slate-700 bg-white">{item.qty}</span>
-                              <button onClick={() => adjustQty('checked', item.id, 1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans font-sans">+</button>
-                            </div>
-                            <button 
-                              onClick={() => deleteItem('checked', item.id)} 
-                              className="text-gray-300 hover:text-red-500 p-1.5"
-                              title="移除"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Category: 伴手禮購物 */}
-                  <div className="space-y-2.5 font-sans">
-                    <h4 className="text-xs font-bold text-[#C68D00] bg-yellow-50 px-2.5 py-1 rounded-lg w-max font-sans font-sans">
-                      🛍 日本預購 ＆ 伴手禮清單
-                    </h4>
-                    <div className="space-y-1.5 font-sans">
-                      {packingList.shopping && packingList.shopping.map(item => (
-                        <div key={item.id} className="flex items-center justify-between p-2 hover:bg-yellow-50/50 rounded-xl transition-all border border-yellow-100/30 font-sans">
-                          
-                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
-                            <span onClick={() => toggleItem('shopping', item.id)} className="shrink-0 font-sans">
+                          <div className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 font-sans">
+                            <span onClick={() => toggleItem('checked', item.id)} className="shrink-0 font-sans font-sans font-sans">
                               {item.checked ? (
                                 <CheckSquare size={16} className="text-[#E6AF2E]" />
                               ) : (
@@ -2162,12 +1739,12 @@ export default function App() {
                               <input 
                                 type="text"
                                 value={item.text}
-                                onChange={(e) => handleEditPackingText('shopping', item.id, e.target.value)}
+                                onChange={(e) => handleEditPackingText('checked', item.id, e.target.value)}
                                 className="w-full text-xs border border-amber-300 bg-amber-50/50 rounded px-1.5 py-0.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-amber-500 font-sans"
                               />
                             ) : (
                               <span 
-                                onClick={() => toggleItem('shopping', item.id)}
+                                onClick={() => toggleItem('checked', id)}
                                 className={`text-xs truncate ${item.checked ? 'line-through text-gray-400 font-medium' : 'text-slate-700'}`}
                               >
                                 {item.text}
@@ -2177,12 +1754,12 @@ export default function App() {
 
                           <div className="flex items-center gap-2 shrink-0">
                             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
-                              <button onClick={() => adjustQty('shopping', item.id, -1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans">-</button>
-                              <span className="px-2 text-[10px] font-bold text-slate-700 bg-white font-sans font-sans">{item.qty}</span>
-                              <button onClick={() => adjustQty('shopping', item.id, 1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans font-sans font-sans">+</button>
+                              <button onClick={() => adjustQty('checked', item.id, -1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans">-</button>
+                              <span className="px-2 text-[10px] font-bold text-slate-700 bg-white font-sans">{item.qty}</span>
+                              <button onClick={() => adjustQty('checked', item.id, 1)} className="px-1.5 py-0.5 bg-[#F5F7FA] text-gray-500 hover:bg-gray-100 text-[10px] font-bold font-sans font-sans font-sans font-sans">+</button>
                             </div>
                             <button 
-                              onClick={() => deleteItem('shopping', item.id)} 
+                              onClick={() => deleteItem('checked', item.id)} 
                               className="text-gray-300 hover:text-red-500 p-1.5"
                               title="移除"
                             >
@@ -2200,31 +1777,29 @@ export default function App() {
                   <select
                     value={newItemCategory}
                     onChange={(e) => setNewItemCategory(e.target.value)}
-                    className="text-xs border border-gray-200 rounded-xl px-2.5 bg-gray-50 text-slate-700 focus:outline-none"
+                    className="text-xs border border-gray-200 rounded-xl px-2.5 bg-gray-50 text-slate-700 focus:outline-none font-sans font-sans"
                   >
                     <option value="personal">隨身</option>
-                    <option value="cabin">手提</option>
                     <option value="checked">託運</option>
-                    <option value="shopping">預購</option>
                   </select>
                   <input
                     type="text"
                     value={newItemText}
                     onChange={(e) => setNewItemText(e.target.value)}
-                    placeholder="新增自訂行李或購買項目..."
-                    className="flex-1 text-xs border border-gray-200 rounded-xl px-3 py-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none text-slate-700"
+                    placeholder="新增自訂行李或清單項目..."
+                    className="flex-1 text-xs border border-gray-200 rounded-xl px-3 py-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none text-slate-700 font-sans font-sans"
                   />
-                  <button type="submit" className="bg-[#2A4B7C] text-white p-2.5 rounded-xl hover:bg-blue-800 transition-colors shrink-0">
+                  <button type="submit" className="bg-[#2A4B7C] text-white p-2.5 rounded-xl hover:bg-blue-800 transition-colors font-sans">
                     <Plus size={14} />
                   </button>
                 </form>
               </div>
 
-              {/* 住宿確認憑證夾 */}
+              {/* 住宿確認 ── 已更正為「住宿資訊」 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
                 <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                   <FileText size={14} className="text-emerald-600" />
-                  <span>住宿資訊憑證夾</span>
+                  <span>住宿資訊</span>
                 </span>
                 
                 <div className="space-y-2.5 font-sans font-sans">
@@ -2232,12 +1807,12 @@ export default function App() {
                     const hotelSpot = d.spots.find(s => s.category === '酒店');
                     return (
                       <div key={d.day} className="border border-emerald-100 rounded-2xl p-3 bg-emerald-50/20 flex justify-between items-center">
-                        <div className="flex-1 pr-2 min-w-0">
-                          <span className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase font-sans">
+                        <div className="flex-1 pr-2 min-w-0 font-sans font-sans font-sans">
+                          <span className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase font-sans font-sans">
                             D{d.day} ({d.date.split(' ')[0]})
                           </span>
                           <h5 className="font-bold text-xs text-slate-800 mt-1 truncate">{hotelSpot.name}</h5>
-                          <span className="text-[10px] text-gray-400 block font-bold">本日訂房花費: ￥{expenses.find(e => e.day === d.day && e.category === '住宿')?.amount?.toLocaleString() || '0'} 日圓</span>
+                          <span className="text-[10px] text-gray-400 block font-bold font-sans">本日訂房花費: ￥{expenses.find(e => e.day === d.day && e.category === '住宿')?.amount?.toLocaleString() || '0'} 日圓</span>
                         </div>
                         <a 
                           href={hotelSpot.navUrl} 
@@ -2255,11 +1830,11 @@ export default function App() {
 
               {/* 日本自駕規則提醒 */}
               <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-3 font-sans">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1 font-sans">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1">
                   <Info size={14} className="text-blue-500" />
                   <span>自駕安全與 ETC 退稅指引</span>
                 </span>
-                <ul className="text-xs text-[#5D6D7E] space-y-2 list-disc pl-4 leading-relaxed">
+                <ul className="text-xs text-[#5D6D7E] space-y-2 list-disc pl-4 leading-relaxed font-sans font-sans">
                   <li><strong>靠左行駛</strong>：日本方向盤及車道均相反，請隨時提醒自己「靠左慢行」。</li>
                   <li><strong>行人優先</strong>：斑白線前若有行人，請務必完全靜止禮讓。</li>
                   <li><strong>過路費/ETC</strong>：自駕上高速公路建議使用 ETC 卡片，方便進出閘道。</li>
@@ -2324,161 +1899,11 @@ export default function App() {
 
         </nav>
 
-        {/* 🌸 ✨ AI GLOBAL ASSISTANT CHAT MODAL/DRAWER */}
-        {chatbotOpen && (
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col justify-end transition-all">
-            
-            {/* Slide-up Container */}
-            <div className="bg-[#F5F7FA] w-full h-[85vh] rounded-t-[2.5rem] flex flex-col shadow-2xl relative border-t border-white/50 animate-slide-up">
-              
-              {/* Header */}
-              <div className="bg-gradient-to-r from-[#2A4B7C] to-[#3B629B] text-white px-5 py-4 rounded-t-[2.5rem] flex justify-between items-center shadow-md">
-                <div className="flex items-center gap-2">
-                  <div className="bg-white/10 p-1.5 rounded-xl animate-bounce">
-                    <Sparkles size={18} className="text-yellow-200 animate-spin" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm">✨ 櫻子・和風記帳 AI 秘書</h4>
-                    <span className="text-[10px] text-blue-100 flex items-center gap-0.5 font-sans">
-                      <Bot size={10} /> Powered by Gemini 3.1 Flash-Lite
-                    </span>
-                  </div>
-                </div>
-                
-                <button
-                  onClick={() => setChatbotOpen(false)}
-                  className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors font-sans"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {/* 🔑 API Key 內嵌 management bar */}
-              <div className="bg-amber-50/70 border-b border-amber-200/50 px-4 py-2 flex items-center justify-between gap-2 text-xs font-sans">
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  <Key size={13} className="text-amber-600 shrink-0" />
-                  <span className="text-[10px] text-amber-800 font-bold shrink-0">Gemini Key:</span>
-                  <input 
-                    type="password"
-                    value={apiKeyInput}
-                    onChange={(e) => setApiKeyInput(e.target.value)}
-                    placeholder={apiKey ? "••••••••••••••••" : "請填入您的 Gemini API Key..."}
-                    className="bg-white border border-gray-200 rounded-lg px-2 py-1 w-full text-[11px] focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono text-slate-800"
-                  />
-                </div>
-                <button
-                  onClick={handleSaveApiKey}
-                  className="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all shrink-0 flex items-center gap-1 shadow-xs active:scale-95"
-                >
-                  <span>儲存/置換</span>
-                </button>
-              </div>
-
-              {/* Chat Messages Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
-                {chatMessages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-3xl px-4 py-2.5 text-xs shadow-xs leading-relaxed ${
-                        msg.sender === 'user'
-                          ? 'bg-[#2A4B7C] text-white rounded-tr-none'
-                          : 'bg-white text-slate-800 border border-gray-100 rounded-tl-none prose max-w-none whitespace-pre-line font-sans'
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                  </div>
-                ))}
-                
-                {chatLoading && (
-                  <div className="flex justify-start font-sans animate-pulse font-sans">
-                    <div className="bg-white border border-gray-100 rounded-3xl rounded-tl-none px-4 py-3 text-xs text-slate-500 shadow-xs flex items-center gap-2">
-                      <div className="flex space-x-1">
-                        <span className="w-1.5 h-1.5 bg-[#FF8E99] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-1.5 h-1.5 bg-[#FF8E99] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-1.5 h-1.5 bg-[#FF8E99] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </div>
-                      <span>櫻子正在努力處理你的需求...</span>
-                    </div>
-                  </div>
-                )}
-                <div ref={chatBottomRef} />
-              </div>
-
-              {/* Quick Action Hints */}
-              <div className="px-4 py-2 border-t border-gray-100 bg-white/40 overflow-x-auto whitespace-nowrap scrollbar-none flex gap-2 font-sans">
-                <button
-                  onClick={() => handleQuickQuestion('記帳 晚餐吃博多季樂佐賀牛鐵板燒花費 12000 日圓')}
-                  className="bg-white hover:bg-gray-50 text-[10px] font-bold text-slate-600 border border-gray-200 px-3 py-1.5 rounded-full shadow-xs shrink-0"
-                >
-                  📝 對話記帳：佐賀牛
-                </button>
-                <button
-                  onClick={() => handleQuickQuestion('記帳 買有田燒咖啡杯組花費 6500 日圓，幫我分類為購物')}
-                  className="bg-white hover:bg-gray-50 text-[10px] font-bold text-slate-600 border border-gray-200 px-3 py-1.5 rounded-full shadow-xs shrink-0"
-                >
-                  🛍 對話記帳：有田燒
-                </button>
-                <button
-                  onClick={() => handleQuickQuestion('記帳 自駕加柴油開銷 3800 日圓')}
-                  className="bg-white hover:bg-gray-50 text-[10px] font-bold text-slate-600 border border-gray-200 px-3 py-1.5 rounded-full shadow-xs shrink-0 font-sans"
-                >
-                  🚗 對話記帳：自駕加油
-                </button>
-              </div>
-
-              {/* Chat Input Bar + Receipt Photo Uploader */}
-              <div className="bg-white p-3 border-t border-gray-100 flex gap-2 items-center">
-                
-                <label className="bg-[#FF8E99]/15 hover:bg-[#FF8E99]/25 text-[#FF5A6F] p-2.5 rounded-2xl cursor-pointer transition-colors shrink-0 flex items-center justify-center font-sans font-sans" title="上傳發票明細照片記帳">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    capture="environment" // 行動裝置直啟相機
-                    className="hidden" 
-                    onChange={handleReceiptUpload} 
-                    disabled={chatLoading}
-                  />
-                  <Camera size={16} />
-                </label>
-
-                <form
-                  id="ai-chat-form"
-                  onSubmit={handleChatSubmit}
-                  className="flex-1 flex gap-2 items-center font-sans"
-                >
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="輸入「記帳 晚餐 5000」或點左側上傳收據..."
-                    disabled={chatLoading}
-                    className="flex-1 bg-slate-50 border border-gray-200 rounded-2xl px-4 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#2A4B7C] font-sans text-slate-800"
-                  />
-                  
-                  <button
-                    type="submit"
-                    disabled={chatLoading || !chatInput.trim()}
-                    className="bg-[#2A4B7C] hover:bg-blue-800 text-white p-2.5 rounded-2xl disabled:opacity-30 transition-all active:scale-95 shrink-0"
-                  >
-                    <Send size={15} />
-                  </button>
-                </form>
-
-              </div>
-
-            </div>
-          </div>
-        )}
-
         {/* ======================================================== */}
-        {/* ✨ 新功能：和風行程點「新增 ＆ 編輯」智慧視窗 (Spot Editor Modal UI) */}
+        {/* ✨ 和風行程點「新增 ＆ 編輯」智慧視窗 (Spot Editor Modal UI) */}
         {/* ======================================================== */}
         {spotModalOpen && (
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col justify-end transition-all font-sans">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col justify-end transition-all font-sans font-sans">
             <div className="bg-white w-full h-[85vh] rounded-t-[2.5rem] flex flex-col shadow-2xl relative border-t border-gray-100 animate-slide-up overflow-hidden font-sans">
               
               {/* Modal Header */}
@@ -2526,8 +1951,36 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* 景點大類 & 停留時間 */}
-                <div className="grid grid-cols-2 gap-2">
+                {/* Google Map 導航按鈕 (新更動優化) */}
+                <div>
+                  <label className="block text-[10px] text-gray-400 font-bold mb-1">🔗 Google Map導航</label>
+                  <div className="flex gap-2 items-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!spotForm.name.trim()) {
+                          setAlertMessage("請先輸入景點或飯店名稱以自動產生導航連結！");
+                          return;
+                        }
+                        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spotForm.name)}`;
+                        setSpotForm(prev => ({ ...prev, navUrl: url }));
+                        setAlertMessage(`已成功為「${spotForm.name}」設定從您出發時的 Google Map 當下定位導航路線！`);
+                      }}
+                      className="bg-blue-50 text-[#2A4B7C] hover:bg-blue-100 border border-blue-200 text-[11px] font-bold py-2.5 px-4 rounded-xl transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <MapPin size={14} className="text-[#FF8E99]" />
+                      <span>設定目前位置到此景點的導航按鈕</span>
+                    </button>
+                    {spotForm.navUrl && spotForm.navUrl.startsWith("https://www.google.com/maps/dir/") && (
+                      <span className="text-xs text-emerald-600 font-bold flex items-center gap-1 animate-fade-in font-sans">
+                        <Check size={14} /> 已自動產生導航
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 景點大類 & 停留時間 (改為雙下拉選單格式) */}
+                <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="block text-[10px] text-gray-400 font-bold mb-1">分類標籤</label>
                     <select
@@ -2543,107 +1996,118 @@ export default function App() {
                       <option value="交通">🚗 交通</option>
                     </select>
                   </div>
+                  
                   <div>
-                    <label className="block text-[10px] text-gray-400 font-bold mb-1">預估停留時間</label>
-                    <input 
-                      type="text" 
-                      value={spotForm.stay}
-                      onChange={(e) => setSpotForm(prev => ({ ...prev, stay: e.target.value }))}
-                      placeholder="例：2 小時"
-                      className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none font-sans"
-                      required
-                    />
+                    <label className="block text-[10px] text-gray-400 font-bold mb-1">預估停留 (小時)</label>
+                    <select
+                      value={stayHours}
+                      onChange={(e) => setStayHours(parseInt(e.target.value))}
+                      className="w-full border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#2A4B7C]"
+                    >
+                      {[...Array(13).keys()].map(h => (
+                        <option key={h} value={h}>{h} 小時</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans">預估停留 (分鐘)</label>
+                    <select
+                      value={stayMinutes}
+                      onChange={(e) => setStayMinutes(parseInt(e.target.value))}
+                      className="w-full border border-gray-200 rounded-xl p-2 bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#2A4B7C]"
+                    >
+                      <option value={0}>0 分鐘</option>
+                      <option value={30}>30 分鐘</option>
+                    </select>
                   </div>
                 </div>
 
-                {/* 詳細描述 */}
+                {/* 標記特殊標籤 (自選標記 必吃、必拍 與 必買) -> 更名為 景點標籤 */}
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] text-gray-400 font-bold">景點標籤</label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const hasTag = spotForm.tags?.includes('必吃');
+                        const nextTags = hasTag 
+                          ? (spotForm.tags || []).filter(t => t !== '必吃')
+                          : [...(spotForm.tags || []), '必吃'];
+                        setSpotForm(prev => ({ ...prev, tags: nextTags }));
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${
+                        spotForm.tags?.includes('必吃')
+                          ? 'bg-[#FF8E99]/20 text-[#FF5A6F] border-[#FF8E99]'
+                          : 'bg-slate-50 text-slate-500 border-gray-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      🍜 必吃
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const hasTag = spotForm.tags?.includes('必拍');
+                        const nextTags = hasTag 
+                          ? (spotForm.tags || []).filter(t => t !== '必拍')
+                          : [...(spotForm.tags || []), '必拍'];
+                        setSpotForm(prev => ({ ...prev, tags: nextTags }));
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${
+                        spotForm.tags?.includes('必拍')
+                          ? 'bg-blue-100 text-blue-600 border-blue-300'
+                          : 'bg-slate-50 text-slate-500 border-gray-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      📸 必拍
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const hasTag = spotForm.tags?.includes('必買');
+                        const nextTags = hasTag 
+                          ? (spotForm.tags || []).filter(t => t !== '必買')
+                          : [...(spotForm.tags || []), '必買'];
+                        setSpotForm(prev => ({ ...prev, tags: nextTags }));
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${
+                        spotForm.tags?.includes('必買')
+                          ? 'bg-amber-100 text-amber-600 border-amber-300'
+                          : 'bg-slate-50 text-slate-500 border-gray-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      🛍️ 必買
+                    </button>
+                  </div>
+                </div>
+
+                {/* 詳細描述 (選填) -> 更名為行程備註 */}
                 <div>
-                  <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans">詳細行程或美食描述</label>
+                  <label className="block text-[10px] text-gray-400 font-bold mb-1">行程備註(選填)</label>
                   <textarea 
                     value={spotForm.desc}
                     onChange={(e) => setSpotForm(prev => ({ ...prev, desc: e.target.value }))}
-                    placeholder="請輸入今天這站景點的背景、想吃的美食或自駕預防要點..."
+                    placeholder="請輸入今天這站景點的背景、想吃的美食或自駕預防要點...（選填）"
                     className="w-full h-16 border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none resize-none font-sans"
-                    required
                   />
                 </div>
 
-                {/* 拍照小訣竅 */}
+                {/* 往下一個點的交通方式 (選填) */}
                 <div>
-                  <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans">📸 拍照好拍技巧 (選填)</label>
+                  <label className="block text-[10px] text-gray-400 font-bold mb-1">🛣 往下一個點的交通方式 (選填)</label>
                   <input 
                     type="text" 
-                    value={spotForm.photoTip}
-                    onChange={(e) => setSpotForm(prev => ({ ...prev, photoTip: e.target.value }))}
-                    placeholder="例：站在櫻井二見浦沙灘上，讓純白鳥居完美框住夫婦岩拍..."
+                    value={spotForm.transitNext}
+                    onChange={(e) => setSpotForm(prev => ({ ...prev, transitNext: e.target.value }))}
+                    placeholder="例：自駕開往御船山樂園"
                     className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none"
                   />
-                </div>
-
-                {/* 自駕停車 & 加油站指引 */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans">🚗 停車位 / Mapcode</label>
-                    <input 
-                      type="text" 
-                      value={spotForm.parking}
-                      onChange={(e) => setSpotForm(prev => ({ ...prev, parking: e.target.value }))}
-                      placeholder="例：備有無料停車位約 20 台"
-                      className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans font-sans">⛽ 附近加油站</label>
-                    <input 
-                      type="text" 
-                      value={spotForm.gas}
-                      onChange={(e) => setSpotForm(prev => ({ ...prev, gas: e.target.value }))}
-                      placeholder="例：開車 3 分鐘有 JA-SS"
-                      className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none font-sans"
-                    />
-                  </div>
-                </div>
-
-                {/* Google Maps / Booking 連結 */}
-                <div>
-                  <label className="block text-[10px] text-gray-400 font-bold mb-1">🔗 Google Maps 導航或 Booking 實體憑證網址</label>
-                  <input 
-                    type="text" 
-                    value={spotForm.navUrl}
-                    onChange={(e) => setSpotForm(prev => ({ ...prev, navUrl: e.target.value }))}
-                    placeholder="輸入 https://..."
-                    className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none"
-                  />
-                </div>
-
-                {/* 往下一個點的交通接駁引導 */}
-                <div className="grid grid-cols-3 gap-2 animate-fade-in font-sans">
-                  <div className="col-span-2">
-                    <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans">🛣 往下一個點的自駕行駛路線</label>
-                    <input 
-                      type="text" 
-                      value={spotForm.transitNext}
-                      onChange={(e) => setSpotForm(prev => ({ ...prev, transitNext: e.target.value }))}
-                      placeholder="例：開往嬉野溫泉街"
-                      className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-gray-400 font-bold mb-1 font-sans">⏱ 接駁行駛時間</label>
-                    <input 
-                      type="text" 
-                      value={spotForm.transitTime}
-                      onChange={(e) => setSpotForm(prev => ({ ...prev, transitTime: e.target.value }))}
-                      placeholder="例：25 分鐘"
-                      className="w-full border border-gray-200 rounded-xl p-2 focus:ring-1 focus:ring-[#2A4B7C] focus:outline-none"
-                    />
-                  </div>
                 </div>
 
                 {/* Submit Action */}
                 <button
                   type="submit"
-                  className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white font-bold py-3 rounded-2xl shadow-md flex items-center justify-center gap-1.5 transition-all text-xs"
+                  className="w-full bg-[#2A4B7C] hover:bg-blue-800 text-white p-3 rounded-2xl shadow-md flex items-center justify-center gap-1.5 transition-all text-xs font-sans"
                 >
                   <Check size={14} />
                   <span>儲存變更行程點</span>
@@ -2654,9 +2118,66 @@ export default function App() {
           </div>
         )}
 
-        {/* 頂部返回頂端按鈕 */}
+        {/* ✨ 客製化聯動刪除與移除警告確認彈窗 (Custom Delete Confirmation Modal) */}
+        {deleteConfirmOpen && (
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-scale-up space-y-4 text-center font-sans">
+              <div className="bg-red-50 text-red-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
+                <Trash2 size={24} />
+              </div>
+              <div className="space-y-1 font-sans font-sans font-sans font-sans">
+                <h4 className="font-bold text-base text-slate-800 font-sans">確定刪除景點？</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  您即將從行程中刪除「<span className="font-semibold text-red-500">{deleteTarget.spotName}</span>」。此動作無法復原。
+                </p>
+                <div className="bg-red-50 text-red-700 text-[11px] p-2.5 rounded-xl border border-red-200/50 font-semibold mt-2 leading-relaxed">
+                  ⚠️ 警告：刪除該景點時，該景點底下關聯的所有記帳消費花費，也將一併從消費紀錄頁面中移除！
+                </div>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmOpen(false)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl transition-all"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteSpot}
+                  className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-2xl transition-all shadow-md shadow-red-500/20"
+                >
+                  確認刪除
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ✨ 客製化防空值警告彈窗 (Custom Alert Dialog) */}
+        {alertMessage && (
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-sans font-sans font-sans font-sans font-sans">
+            <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-scale-up space-y-4 text-center font-sans">
+              <div className="bg-amber-50 text-amber-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
+                <Info size={24} />
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                {alertMessage}
+              </p>
+              <button
+                type="button"
+                onClick={() => setAlertMessage('')}
+                className="w-full py-2.5 bg-[#2A4B7C] hover:bg-blue-800 text-white text-xs font-bold rounded-2xl transition-all shadow-md font-sans"
+              >
+                確 定
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 返回頂端按鈕 */}
         <button 
-          className="fixed bottom-[90px] right-5 bg-emerald-600 hover:bg-[#FF8E99] text-white p-3 rounded-full shadow-2xl z-40 transition-transform hover:scale-105 active:scale-95" 
+          className="fixed bottom-[90px] right-5 bg-emerald-600 hover:bg-[#FF8E99] text-white p-3 rounded-full shadow-2xl z-40 transition-transform hover:scale-105 active:scale-95 animate-fade-in" 
           onClick={() => {
             const mainEl = document.getElementById('main-content-area');
             if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
